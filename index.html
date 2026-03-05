@@ -13,14 +13,13 @@
         <link rel="stylesheet" href="css/leaflet-search.css">
         <link rel="stylesheet" href="css/leaflet.photon.css">
         <style>
-        /* Tetapan untuk memastikan tajuk dan peta tersusun */
         html, body {
             width: 100%;
             height: 100%;
             padding: 0;
             margin: 0;
             display: flex;
-            flex-direction: column; /* Susun ke bawah */
+            flex-direction: column;
         }
         
         #title-header {
@@ -36,7 +35,7 @@
 
         #map {
             width: 100%;
-            flex-grow: 1; /* Peta akan ambil baki ruang bawah */
+            flex-grow: 1;
             padding: 0;
             margin: 0;
         }
@@ -284,102 +283,37 @@
         });
         bounds_group.addLayer(layer_LOTFINAL_2);
         map.addLayer(layer_LOTFINAL_2);
-        function pop_TANDASEMPADAN_3(feature, layer) {
-            layer.on({
-                mouseout: function(e) {
-                    if (typeof layer.closePopup == 'function') {
-                        layer.closePopup();
-                    } else {
-                        layer.eachLayer(function(feature){
-                            feature.closePopup()
-                        });
-                    }
-                },
-                mouseover: highlightFeature,
-            });
-            var popupContent = '<table>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['FID'] !== null ? autolinker.link(String(feature.properties['FID']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['vertex_ind'] !== null ? autolinker.link(String(feature.properties['vertex_ind']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['vertex_par'] !== null ? autolinker.link(String(feature.properties['vertex_par']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['vertex_p_1'] !== null ? autolinker.link(String(feature.properties['vertex_p_1']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['vertex_p_2'] !== null ? autolinker.link(String(feature.properties['vertex_p_2']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['distance'] !== null ? autolinker.link(String(feature.properties['distance']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['angle'] !== null ? autolinker.link(String(feature.properties['angle']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['X'] !== null ? autolinker.link(String(feature.properties['X']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['Y'] !== null ? autolinker.link(String(feature.properties['Y']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                </table>';
-            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
-			layer.on('popupopen', function(e) {
-				addClassToPopupIfMedia(content, e.popup);
-			});
-			layer.bindPopup(content, { maxHeight: 400 });
-        }
-
-        function style_TANDASEMPADAN_3_0() {
-            return {
-                pane: 'pane_TANDASEMPADAN_3',
-                radius: 4.0,
-                opacity: 1,
-                color: 'rgba(35,35,35,1.0)',
-                dashArray: '',
-                lineCap: 'butt',
-                lineJoin: 'miter',
-                weight: 1,
-                fill: true,
-                fillOpacity: 1,
-                fillColor: 'rgba(183,72,75,1.0)',
-                interactive: true,
-            }
-        }
-        map.createPane('pane_TANDASEMPADAN_3');
-        map.getPane('pane_TANDASEMPADAN_3').style.zIndex = 403;
-        map.getPane('pane_TANDASEMPADAN_3').style['mix-blend-mode'] = 'normal';
-        var layer_TANDASEMPADAN_3 = new L.geoJson(json_TANDASEMPADAN_3, {
-            attribution: '',
-            interactive: true,
-            dataVar: 'json_TANDASEMPADAN_3',
-            layerName: 'layer_TANDASEMPADAN_3',
-            pane: 'pane_TANDASEMPADAN_3',
-            onEachFeature: pop_TANDASEMPADAN_3,
-            pointToLayer: function (feature, latlng) {
-                var context = {
-                    feature: feature,
-                    variables: {}
-                };
-                return L.circleMarker(latlng, style_TANDASEMPADAN_3_0(feature));
-            },
-        });
-        bounds_group.addLayer(layer_TANDASEMPADAN_3);
-        map.addLayer(layer_TANDASEMPADAN_3);
-        setBounds();
-        map.addControl(new L.Control.Search({
+        
+        // FUNGSI CARIAN DENGAN AUTO ZOOM DAN AUTO POPUP
+        var searchControl = new L.Control.Search({
             layer: layer_LOTFINAL_2,
             initial: false,
             hideMarkerOnCollapse: true,
-            propertyName: 'NO_LOT'}));
+            propertyName: 'NO_LOT',
+            moveToLocation: function(latlng, title, map) {
+                // Mencari feature yang sepadan dalam layer
+                var layers = layer_LOTFINAL_2.getLayers();
+                for (var i = 0; i < layers.length; i++) {
+                    if (layers[i].feature.properties.NO_LOT == title) {
+                        // 1. Auto Zoom ke Lot tersebut
+                        var bounds = layers[i].getBounds();
+                        map.fitBounds(bounds, {maxZoom: 20});
+                        
+                        // 2. Auto Open Popup (Listkan Maklumat)
+                        layers[i].openPopup();
+                        break;
+                    }
+                }
+            }
+        });
+        map.addControl(searchControl);
+
         if (typeof url === 'undefined') {
             document.getElementsByClassName('search-button')[0].className += ' fa fa-binoculars';
         } else {
             document.getElementsByClassName('search-button')[1].className += ' fa fa-binoculars';
         }
+
         resetLabels([layer_POLYGONIZEE_1,layer_TANDASEMPADAN_3]);
         map.on("zoomend", function(){
             resetLabels([layer_POLYGONIZEE_1,layer_TANDASEMPADAN_3]);
