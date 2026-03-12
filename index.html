@@ -36,7 +36,6 @@
             z-index: 1000;
         }
 
-        /* Layout untuk Sidebar dan Peta */
         #main-container {
             display: flex;
             flex-direction: row;
@@ -98,6 +97,19 @@
             font-weight: bold;
             color: #666;
         }
+
+        /* --- GAYA LABEL DI ATAS PETA --- */
+        .leaflet-tooltip.lot-label {
+            background: rgba(255, 255, 255, 0.75);
+            border: 1px solid #999;
+            border-radius: 3px;
+            color: #333;
+            font-weight: bold;
+            font-size: 9px;
+            text-align: center;
+            padding: 2px;
+            box-shadow: none;
+        }
         </style>
         <title>TAMAN PERUMAHAN</title>
     </head>
@@ -139,44 +151,13 @@
         <script src="data/TANDASEMPADAN_3.js"></script>
         <script>
         var highlightLayer;
-        function highlightFeature(e) {
-            highlightLayer = e.target;
-            highlightLayer.openPopup();
-        }
         var map = L.map('map', {
             zoomControl:false, maxZoom:28, minZoom:1
         }).fitBounds([[2.1022779341308064,102.52037699699693],[2.1050033227290808,102.52490225827017]]);
         
         var hash = new L.Hash(map);
-        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
-        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a>');
         
-        function removeEmptyRowsFromPopupContent(content, feature) {
-         var tempDiv = document.createElement('div');
-         tempDiv.innerHTML = content;
-         var rows = tempDiv.querySelectorAll('tr');
-         for (var i = 0; i < rows.length; i++) {
-             var td = rows[i].querySelector('td.visible-with-data');
-             var key = td ? td.id : '';
-             if (td && td.classList.contains('visible-with-data') && feature.properties[key] == null) {
-                 rows[i].parentNode.removeChild(rows[i]);
-             }
-         }
-         return tempDiv.innerHTML;
-        }
-
-        function addClassToPopupIfMedia(content, popup) {
-            var tempDiv = document.createElement('div');
-            tempDiv.innerHTML = content;
-            var imgTd = tempDiv.querySelector('td img');
-            if (imgTd) {
-                var src = imgTd.getAttribute('src');
-                if (/\.(jpg|jpeg|png|gif|bmp|webp|avif)$/i.test(src)) {
-                    popup._contentNode.classList.add('media');
-                }
-            }
-        }
-
         var zoomControl = L.control.zoom({
             position: 'topleft'
         }).addTo(map);
@@ -186,7 +167,7 @@
         var layer_GoogleSatellite_0 = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
             pane: 'pane_GoogleSatellite_0',
             opacity: 1.0,
-            attribution: '<a href="https://www.google.at/permissions/geoguidelines/attr-guide.html">Map data ©2015 Google</a>',
+            attribution: 'Map data ©2015 Google',
             minZoom: 1,
             maxZoom: 28,
         });
@@ -199,7 +180,7 @@
                 opacity: 1,
                 color: 'rgba(35,35,35,1.0)',
                 fill: true,
-                fillOpacity: 1,
+                fillOpacity: 0.6,
                 fillColor: 'rgba(225,89,137,1.0)',
                 interactive: true,
             }
@@ -212,14 +193,14 @@
         });
         map.addLayer(layer_POLYGONIZEE_1);
 
-        // LAYER LOTFINAL (UTAMA UNTUK CARIAN)
+        // LAYER LOTFINAL (DENGAN LABEL HAKMILIK & PEMILIK)
         function style_LOTFINAL_2_0() {
             return {
                 pane: 'pane_LOTFINAL_2',
                 opacity: 1,
                 color: 'rgba(35,35,35,1.0)',
                 fill: true,
-                fillOpacity: 1,
+                fillOpacity: 0.5,
                 fillColor: 'rgba(152,125,183,1.0)',
                 interactive: true,
             }
@@ -231,7 +212,20 @@
             pane: 'pane_LOTFINAL_2',
             style: style_LOTFINAL_2_0,
             onEachFeature: function(feature, layer) {
-                // Tambah ke senarai dropdown carian
+                // TAMBAH LABEL PERMANEN PADA PETA
+                var lotNo = feature.properties['NO_LOT'] || '-';
+                var owner = feature.properties['PEMILIK'] || '-';
+                
+                layer.bindTooltip(
+                    '<div>Lot: ' + lotNo + '<br>' + owner + '</div>', 
+                    {
+                        permanent: true, 
+                        direction: 'center', 
+                        className: 'lot-label'
+                    }
+                ).openTooltip();
+
+                // TAMBAH KE DROPDOWN
                 var select = document.getElementById('lotSearchSelect');
                 var option = document.createElement('option');
                 option.value = feature.properties['NO_LOT'];
@@ -241,26 +235,20 @@
                 layer.on({
                     click: function(e) {
                         displayLotInfo(feature.properties);
+                        L.DomEvent.stopPropagation(e);
                     }
                 });
             }
         });
         map.addLayer(layer_LOTFINAL_2);
 
-        // FUNGSI ZOOM DAN TUNJUK MAKLUMAT
+        // FUNGSI ZOOM DAN DISPLAY
         function zoomToLot(lotNo) {
             if (!lotNo) return;
-            
             layer_LOTFINAL_2.eachLayer(function(layer) {
                 if (layer.feature.properties['NO_LOT'] == lotNo) {
-                    // Zoom ke lot
                     map.fitBounds(layer.getBounds(), {padding: [50, 50]});
-                    
-                    // Highlight dan buka maklumat
                     displayLotInfo(layer.feature.properties);
-                    
-                    // Trigger popup pada peta juga
-                    layer.bindPopup("Lot: " + lotNo).openPopup();
                 }
             });
         }
@@ -273,8 +261,8 @@
             var html = '<table class="info-table">';
             html += '<tr><td>NO LOT</td><td>: ' + (props['NO_LOT'] || '-') + '</td></tr>';
             html += '<tr><td>KELUASAN</td><td>: ' + (props['AREA'] || '-') + '</td></tr>';
-            html += '<tr><td>TSP HA</td><td>: ' + (props['DAERAH'] || '-') + '</td></tr>';
-            html += '<tr><td>TSP PE</td><td>: ' + (props['PEMILIK'] || '-') + '</td></tr>';
+            html += '<tr><td>DAERAH</td><td>: ' + (props['DAERAH'] || '-') + '</td></tr>';
+            html += '<tr><td>PEMILIK</td><td>: ' + (props['PEMILIK'] || '-') + '</td></tr>';
             html += '</table>';
             
             content.innerHTML = html;
@@ -302,10 +290,6 @@
         });
         map.addLayer(layer_TANDASEMPADAN_3);
 
-        resetLabels([layer_POLYGONIZEE_1, layer_TANDASEMPADAN_3]);
-        map.on("zoomend layeradd layerremove", function(){
-            resetLabels([layer_POLYGONIZEE_1, layer_TANDASEMPADAN_3]);
-        });
         </script>        
     </body>
 </html>
