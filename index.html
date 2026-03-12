@@ -98,17 +98,16 @@
             color: #666;
         }
 
-        /* --- GAYA LABEL DI ATAS PETA --- */
+        /* --- GAYA LABEL TERAPUNG (TIADA KOTAK) --- */
         .leaflet-tooltip.lot-label {
-            background: rgba(255, 255, 255, 0.75);
-            border: 1px solid #999;
-            border-radius: 3px;
-            color: #333;
+            background-color: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            color: #000; 
             font-weight: bold;
-            font-size: 9px;
+            font-size: 12px;
             text-align: center;
-            padding: 2px;
-            box-shadow: none;
+            text-shadow: 2px 2px 4px #fff, -2px -2px 4px #fff, 2px -2px 4px #fff, -2px 2px 4px #fff; 
         }
         </style>
         <title>TAMAN PERUMAHAN</title>
@@ -150,13 +149,11 @@
         <script src="data/LOTFINAL_2.js"></script>
         <script src="data/TANDASEMPADAN_3.js"></script>
         <script>
-        var highlightLayer;
         var map = L.map('map', {
             zoomControl:false, maxZoom:28, minZoom:1
         }).fitBounds([[2.1022779341308064,102.52037699699693],[2.1050033227290808,102.52490225827017]]);
         
         var hash = new L.Hash(map);
-        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a>');
         
         var zoomControl = L.control.zoom({
             position: 'topleft'
@@ -173,34 +170,14 @@
         });
         map.addLayer(layer_GoogleSatellite_0);
 
-        // LAYER POLYGONIZEE
-        function style_POLYGONIZEE_1_0() {
-            return {
-                pane: 'pane_POLYGONIZEE_1',
-                opacity: 1,
-                color: 'rgba(35,35,35,1.0)',
-                fill: true,
-                fillOpacity: 0.6,
-                fillColor: 'rgba(225,89,137,1.0)',
-                interactive: true,
-            }
-        }
-        map.createPane('pane_POLYGONIZEE_1');
-        map.getPane('pane_POLYGONIZEE_1').style.zIndex = 401;
-        var layer_POLYGONIZEE_1 = new L.geoJson(json_POLYGONIZEE_1, {
-            pane: 'pane_POLYGONIZEE_1',
-            style: style_POLYGONIZEE_1_0,
-        });
-        map.addLayer(layer_POLYGONIZEE_1);
-
-        // LAYER LOTFINAL (DENGAN LABEL HAKMILIK & PEMILIK)
+        // LAYER LOTFINAL
         function style_LOTFINAL_2_0() {
             return {
                 pane: 'pane_LOTFINAL_2',
                 opacity: 1,
                 color: 'rgba(35,35,35,1.0)',
                 fill: true,
-                fillOpacity: 0.5,
+                fillOpacity: 0.4,
                 fillColor: 'rgba(152,125,183,1.0)',
                 interactive: true,
             }
@@ -212,20 +189,15 @@
             pane: 'pane_LOTFINAL_2',
             style: style_LOTFINAL_2_0,
             onEachFeature: function(feature, layer) {
-                // TAMBAH LABEL PERMANEN PADA PETA
-                var lotNo = feature.properties['NO_LOT'] || '-';
-                var owner = feature.properties['PEMILIK'] || '-';
-                
-                layer.bindTooltip(
-                    '<div>Lot: ' + lotNo + '<br>' + owner + '</div>', 
-                    {
-                        permanent: true, 
-                        direction: 'center', 
-                        className: 'lot-label'
-                    }
-                ).openTooltip();
+                // LABEL TERAPUNG (HANYA NO LOT SUPAYA KEMAS)
+                var lotLabel = feature.properties['NO_LOT'] || '';
+                layer.bindTooltip(lotLabel, {
+                    permanent: true, 
+                    direction: 'center', 
+                    className: 'lot-label'
+                }).openTooltip();
 
-                // TAMBAH KE DROPDOWN
+                // ISI DROPDOWN
                 var select = document.getElementById('lotSearchSelect');
                 var option = document.createElement('option');
                 option.value = feature.properties['NO_LOT'];
@@ -235,24 +207,13 @@
                 layer.on({
                     click: function(e) {
                         displayLotInfo(feature.properties);
-                        L.DomEvent.stopPropagation(e);
                     }
                 });
             }
         });
         map.addLayer(layer_LOTFINAL_2);
 
-        // FUNGSI ZOOM DAN DISPLAY
-        function zoomToLot(lotNo) {
-            if (!lotNo) return;
-            layer_LOTFINAL_2.eachLayer(function(layer) {
-                if (layer.feature.properties['NO_LOT'] == lotNo) {
-                    map.fitBounds(layer.getBounds(), {padding: [50, 50]});
-                    displayLotInfo(layer.feature.properties);
-                }
-            });
-        }
-
+        // FUNGSI PAPAR MAKLUMAT (LABEL DAERAH & PEMILIK)
         function displayLotInfo(props) {
             var infoDiv = document.getElementById('lotInfo');
             var content = document.getElementById('detailsContent');
@@ -268,28 +229,15 @@
             content.innerHTML = html;
         }
 
-        // LAYER TANDASEMPADAN
-        function style_TANDASEMPADAN_3_0() {
-            return {
-                pane: 'pane_TANDASEMPADAN_3',
-                radius: 4.0,
-                color: 'rgba(35,35,35,1.0)',
-                fill: true,
-                fillOpacity: 1,
-                fillColor: 'rgba(183,72,75,1.0)',
-                interactive: true,
-            }
+        function zoomToLot(lotNo) {
+            if (!lotNo) return;
+            layer_LOTFINAL_2.eachLayer(function(layer) {
+                if (layer.feature.properties['NO_LOT'] == lotNo) {
+                    map.fitBounds(layer.getBounds(), {padding: [50, 50]});
+                    displayLotInfo(layer.feature.properties);
+                }
+            });
         }
-        map.createPane('pane_TANDASEMPADAN_3');
-        map.getPane('pane_TANDASEMPADAN_3').style.zIndex = 403;
-        var layer_TANDASEMPADAN_3 = new L.geoJson(json_TANDASEMPADAN_3, {
-            pane: 'pane_TANDASEMPADAN_3',
-            pointToLayer: function (feature, latlng) {
-                return L.circleMarker(latlng, style_TANDASEMPADAN_3_0());
-            },
-        });
-        map.addLayer(layer_TANDASEMPADAN_3);
-
         </script>        
     </body>
 </html>
