@@ -96,9 +96,9 @@
         .info-table tr td:first-child {
             font-weight: bold;
             color: #666;
+            width: 40%;
         }
 
-        /* --- GAYA LABEL TERAPUNG (TIADA KOTAK) --- */
         .leaflet-tooltip.lot-label {
             background-color: transparent !important;
             border: none !important;
@@ -154,10 +154,7 @@
         }).fitBounds([[2.1022779341308064,102.52037699699693],[2.1050033227290808,102.52490225827017]]);
         
         var hash = new L.Hash(map);
-        
-        var zoomControl = L.control.zoom({
-            position: 'topleft'
-        }).addTo(map);
+        var zoomControl = L.control.zoom({ position: 'topleft' }).addTo(map);
 
         map.createPane('pane_GoogleSatellite_0');
         map.getPane('pane_GoogleSatellite_0').style.zIndex = 400;
@@ -170,7 +167,6 @@
         });
         map.addLayer(layer_GoogleSatellite_0);
 
-        // LAYER LOTFINAL
         function style_LOTFINAL_2_0() {
             return {
                 pane: 'pane_LOTFINAL_2',
@@ -189,7 +185,6 @@
             pane: 'pane_LOTFINAL_2',
             style: style_LOTFINAL_2_0,
             onEachFeature: function(feature, layer) {
-                // LABEL TERAPUNG (HANYA NO LOT SUPAYA KEMAS)
                 var lotLabel = feature.properties['NO_LOT'] || '';
                 layer.bindTooltip(lotLabel, {
                     permanent: true, 
@@ -197,7 +192,6 @@
                     className: 'lot-label'
                 }).openTooltip();
 
-                // ISI DROPDOWN
                 var select = document.getElementById('lotSearchSelect');
                 var option = document.createElement('option');
                 option.value = feature.properties['NO_LOT'];
@@ -213,7 +207,7 @@
         });
         map.addLayer(layer_LOTFINAL_2);
 
-        // FUNGSI PAPAR MAKLUMAT (LABEL DAERAH & PEMILIK)
+        // FUNGSI PAPAR MAKLUMAT (MENGAMBIL DATA DARI PROPERTIES)
         function displayLotInfo(props) {
             var infoDiv = document.getElementById('lotInfo');
             var content = document.getElementById('detailsContent');
@@ -222,8 +216,8 @@
             var html = '<table class="info-table">';
             html += '<tr><td>NO LOT</td><td>: ' + (props['NO_LOT'] || '-') + '</td></tr>';
             html += '<tr><td>KELUASAN</td><td>: ' + (props['AREA'] || '-') + '</td></tr>';
-            html += '<tr><td>DAERAH</td><td>: ' + (props['DAERAH'] || '-') + '</td></tr>';
-            html += '<tr><td>PEMILIK</td><td>: ' + (props['PEMILIK'] || '-') + '</td></tr>';
+            html += '<tr><td>DAERAH</td><td>: ' + (props['DAERAH'] || '-') + '</td></tr>'; // Pastikan nama field dalam QGIS adalah DAERAH
+            html += '<tr><td>PEMILIK</td><td>: ' + (props['PEMILIK'] || '-') + '</td></tr>'; // Pastikan nama field dalam QGIS adalah PEMILIK
             html += '</table>';
             
             content.innerHTML = html;
