@@ -7,9 +7,9 @@
         <meta name="mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-capable" content="yes">
         
-        <title>SISTEM PENGURUSAN LOT - TAMAN PERUMAHAN</title>
-        <link rel="icon" type="image/png" href="GAMBAR.PNG">
+        <title>SISTEM PENGURUSAN LOT | JABATAN KEJURUTERAAN AWAM PUO</title>
         
+        <link rel="icon" type="image/png" href="GAMBAR.PNG">
         <link rel="stylesheet" href="css/leaflet.css">
         <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
         <link rel="stylesheet" href="css/qgis2web.css">
@@ -18,212 +18,136 @@
         <link rel="stylesheet" href="css/leaflet.photon.css">
         
         <style>
-            /* 1. Pengaturan Layout Utama */
+            /* 1. GAYA LOGIN (OVERLAY) */
+            #login-screen {
+                position: fixed;
+                top: 0; left: 0; width: 100%; height: 100%;
+                background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+                display: flex; justify-content: center; align-items: center;
+                z-index: 10000; transition: 0.5s;
+            }
+            .login-container {
+                background: rgba(255, 255, 255, 0.95);
+                padding: 40px; border-radius: 20px;
+                box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+                width: 380px; text-align: center;
+            }
+            .login-container img { width: 120px; margin-bottom: 15px; }
+            .login-container h2 { margin: 0 0 10px; color: #333; font-size: 20px; }
+            .login-container input {
+                width: 100%; padding: 12px; margin: 10px 0;
+                border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box;
+            }
+            .login-container button {
+                width: 100%; padding: 12px; background: #2c3e50;
+                color: white; border: none; border-radius: 8px;
+                cursor: pointer; font-size: 16px; font-weight: bold;
+                transition: 0.3s;
+            }
+            .login-container button:hover { background: #d63384; }
+
+            /* 2. LAYOUT UTAMA */
             html, body {
-                width: 100%;
-                height: 100%;
-                padding: 0;
-                margin: 0;
-                display: flex;
-                flex-direction: column;
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                background-color: #f0f2f5;
+                width: 100%; height: 100%; padding: 0; margin: 0;
+                display: flex; flex-direction: column;
+                font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             }
-            
-            /* 2. Header / Tajuk Utama */
-            #title-header {
-                background-color: #ffffff;
-                color: #2c3e50;
-                text-align: center;
-                padding: 15px 0;
-                margin: 0;
-                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-                z-index: 1000;
-                font-size: 24px;
-                font-weight: bold;
-                letter-spacing: 1px;
+            #app-header {
+                background: #ffffff; color: #333; padding: 15px;
+                text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                z-index: 1000; display: none; border-bottom: 4px solid #d63384;
+            }
+            #main-content {
+                display: none; flex-direction: row; flex-grow: 1; overflow: hidden;
             }
 
-            /* 3. Kontena Kandungan */
-            #main-container {
-                display: flex;
-                flex-direction: row;
-                flex-grow: 1;
-                overflow: hidden;
-            }
-
-            /* 4. Sidebar Navigasi & Info */
+            /* 3. SIDEBAR STYLING */
             #sidebar {
-                width: 320px;
-                background: #ffffff;
-                border-right: 1px solid #dee2e6;
-                padding: 20px;
-                overflow-y: auto;
-                box-shadow: 4px 0 10px rgba(0,0,0,0.03);
-                z-index: 999;
-                display: flex;
-                flex-direction: column;
+                width: 340px; background: #ffffff;
+                border-right: 1px solid #e0e0e0; padding: 20px;
+                overflow-y: auto; box-shadow: 2px 0 15px rgba(0,0,0,0.05);
             }
-
-            /* 5. Komponen Peta */
-            #map {
-                flex-grow: 1;
-                height: 100%;
-                background: #e5e3df;
-            }
-
-            /* 6. Elemen Carian Dropdown */
-            .search-section {
-                margin-bottom: 25px;
-                padding-bottom: 20px;
-                border-bottom: 1px solid #eee;
-            }
-
-            .search-label {
-                font-weight: 600;
-                display: block;
-                margin-bottom: 10px;
-                color: #495057;
-                font-size: 14px;
-            }
-
+            .widget { margin-bottom: 25px; }
+            .widget-title { font-weight: bold; color: #555; margin-bottom: 10px; font-size: 14px; text-transform: uppercase; }
+            
             #lotSearchSelect {
-                width: 100%;
-                padding: 10px;
-                border-radius: 6px;
-                border: 1px solid #ced4da;
-                background-color: #fff;
-                font-size: 14px;
-                color: #495057;
-                transition: border-color 0.15s ease-in-out;
+                width: 100%; padding: 12px; border-radius: 8px;
+                border: 1px solid #ced4da; font-size: 14px;
             }
 
-            #lotSearchSelect:focus {
-                border-color: #80bdff;
-                outline: 0;
-                box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+            /* 4. INFO BOX STYLING */
+            .info-panel {
+                background: #fdfdfd; border: 1px solid #eee;
+                border-radius: 12px; padding: 20px; display: none;
+                animation: slideUp 0.3s ease-out;
             }
-
-            /* 7. Kotak Maklumat Lot */
-            .info-box {
-                background: #fff;
-                padding: 0;
-                border-radius: 8px;
-                border: 1px solid #e9ecef;
-                display: none;
-                animation: fadeIn 0.4s ease;
+            @keyframes slideUp {
+                from { transform: translateY(20px); opacity: 0; }
+                to { transform: translateY(0); opacity: 1; }
             }
+            .info-table { width: 100%; font-size: 13px; }
+            .info-table td { padding: 10px 5px; border-bottom: 1px solid #f1f1f1; }
+            .td-label { font-weight: bold; color: #888; width: 35%; }
 
-            @keyframes fadeIn {
-                from { opacity: 0; transform: translateY(10px); }
-                to { opacity: 1; transform: translateY(0); }
-            }
-
-            .info-header {
-                background: #f8f9fa;
-                padding: 12px 15px;
-                border-radius: 8px 8px 0 0;
-                border-bottom: 1px solid #eee;
-                margin: 0;
-            }
-
-            .info-header h3 {
-                margin: 0;
-                font-size: 16px;
-                color: #d63384;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-            }
-
-            .info-content {
-                padding: 15px;
-            }
-
-            .info-table {
-                width: 100%;
-                font-size: 13px;
-                border-collapse: collapse;
-            }
-
-            .info-table tr td {
-                padding: 8px 0;
-                border-bottom: 1px solid #f8f9fa;
-            }
-
-            .info-table tr:last-child td {
-                border-bottom: none;
-            }
-
-            .label-key {
-                font-weight: 600;
-                color: #6c757d;
-                width: 40%;
-            }
-
-            .label-value {
-                color: #212529;
-                font-weight: 500;
-            }
-
-            /* 8. Label No Lot pada Peta */
+            /* 5. MAP & LABEL STYLING */
+            #map { flex-grow: 1; height: 100%; }
             .lot-label {
-                background: transparent !important;
-                border: none !important;
-                box-shadow: none !important;
-                color: #000; 
-                font-weight: 800;
-                font-size: 11px;
-                text-align: center;
-                text-shadow: 2px 2px 0px #fff, -2px -2px 0px #fff, 2px -2px 0px #fff, -2px 2px 0px #fff; 
-                pointer-events: none;
+                background: transparent !important; border: none !important;
+                color: #000; font-weight: 900; font-size: 10px;
+                text-align: center; text-shadow: 2px 2px 4px #fff, -2px -2px 4px #fff;
             }
 
-            /* 9. Customize Search Control Leaflet */
+            /* 6. SEARCH BINOCULARS OVERRIDE */
             .leaflet-control-search .search-button {
                 background-image: none !important;
-                display: flex !important;
-                align-items: center;
-                justify-content: center;
+                display: flex !important; align-items: center; justify-content: center;
             }
-
-            .leaflet-control-search .search-button:before {
-                content: '\f06e'; /* Ikon Binoculars FontAwesome */
-                font-family: 'Font Awesome 5 Free';
-                font-weight: 900;
-                color: #333;
-                font-size: 14px;
+            .leaflet-control-search .search-button::before {
+                content: '\f06e'; font-family: 'Font Awesome 5 Free';
+                font-weight: 900; color: #333; font-size: 16px;
             }
         </style>
     </head>
     <body>
-        
-        <h1 id="title-header">TAMAN PERUMAHAN: LOT MANAGEMENT SYSTEM</h1>
 
-        <div id="main-container">
-            <div id="sidebar">
-                <div class="search-section">
-                    <label class="search-label">CARI NO. LOT (SENARAI):</label>
-                    <select id="lotSearchSelect" onchange="zoomToLot(this.value)">
-                        <option value="">-- Sila Pilih Lot --</option>
+        <div id="login-screen">
+            <div class="login-container">
+                <img src="GAMBAR.PNG" alt="Logo">
+                <h2>SISTEM PENGURUSAN LOT</h2>
+                <p style="color: #666; font-size: 13px; margin-top:-5px;">Jabatan Kejuruteraan Awam, PUO</p>
+                <input type="text" id="userInput" placeholder="ID Pengguna">
+                <input type="password" id="passInput" placeholder="Kata Laluan">
+                <button onclick="checkLogin()">LOG MASUK</button>
+                <p id="error-msg" style="color:red; font-size:12px; display:none; margin-top:10px;">Akses Ditolak! Sila cuba lagi.</p>
+            </div>
+        </div>
+
+        <header id="app-header">
+            <h1 style="margin:0; font-size:20px;">SISTEM MAKLUMAT LOT TANAH (GIS-LOT)</h1>
+        </header>
+
+        <div id="main-content">
+            <aside id="sidebar">
+                <div class="widget">
+                    <div class="widget-title">Carian Pantas</div>
+                    <select id="lotSearchSelect" onchange="navigateLot(this.value)">
+                        <option value="">-- Pilih No Lot --</option>
                     </select>
                 </div>
 
-                <div id="lotInfo" class="info-box">
-                    <div class="info-header">
-                        <h3>Maklumat Lot Terperinci</h3>
-                    </div>
-                    <div class="info-content" id="detailsContent">
-                        </div>
+                <div id="infoPanel" class="info-panel">
+                    <div class="widget-title" style="color:#d63384;">Maklumat Pemilikan</div>
+                    <div id="infoContent"></div>
                 </div>
-                
-                <div style="margin-top: auto; font-size: 11px; color: #adb5bd; text-align: center; padding-top: 20px;">
-                    Sistem Pengurusan Lot &copy; 2026
+
+                <div style="margin-top:30px; border-top:1px solid #eee; padding-top:20px;">
+                    <button onclick="location.reload()" style="width:100%; padding:10px; border:1px solid #ccc; background:none; border-radius:5px; cursor:pointer;">Keluar Sistem</button>
                 </div>
-            </div>
+            </aside>
 
             <div id="map"></div>
         </div>
-        
+
         <script src="js/qgis2web_expressions.js"></script>
         <script src="js/leaflet.js"></script>
         <script src="js/L.Control.Layers.Tree.min.js"></script>
@@ -234,167 +158,147 @@
         <script src="js/rbush.min.js"></script>
         <script src="js/labelgun.min.js"></script>
         <script src="js/labels.js"></script>
-        <script src="js/leaflet.photon.js"></script>
         <script src="js/leaflet-search.js"></script>
         
-        <script src="data/POLYGONIZEE_1.js"></script>
         <script src="data/LOTFINAL_2.js"></script>
         <script src="data/TANDASEMPADAN_3.js"></script>
 
         <script>
             /**
-             * KONFIGURASI PETA UTAMA
+             * 1. PENGURUSAN LOGIN
              */
-            var map = L.map('map', {
-                zoomControl: true, 
-                maxZoom: 28, 
-                minZoom: 1
-            }).setView([2.1036, 102.5226], 18); // Default view
-            
-            var hash = new L.Hash(map);
-
-            // Layer Google Satellite
-            map.createPane('pane_GoogleSatellite_0');
-            map.getPane('pane_GoogleSatellite_0').style.zIndex = 400;
-            var layer_GoogleSatellite_0 = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
-                pane: 'pane_GoogleSatellite_0',
-                opacity: 1.0,
-                attribution: 'Map data &copy;2015 Google',
-                minZoom: 1,
-                maxZoom: 28,
-            });
-            map.addLayer(layer_GoogleSatellite_0);
-
-            /**
-             * STYLE UNTUK LOT FINAL
-             */
-            function style_LOTFINAL_2_0() {
-                return {
-                    pane: 'pane_LOTFINAL_2',
-                    opacity: 1,
-                    color: '#232323',
-                    weight: 1.5,
-                    fill: true,
-                    fillOpacity: 0.4,
-                    fillColor: '#987db7',
-                    interactive: true,
+            function checkLogin() {
+                var u = document.getElementById('userInput').value;
+                var p = document.getElementById('passInput').value;
+                
+                // Kredential: admin | 1234
+                if (u === "admin" && p === "1234") {
+                    document.getElementById('login-screen').style.opacity = '0';
+                    setTimeout(() => {
+                        document.getElementById('login-screen').style.display = 'none';
+                        document.getElementById('app-header').style.display = 'block';
+                        document.getElementById('main-content').style.display = 'flex';
+                        initMap(); // Panggil pemulaan peta
+                    }, 500);
+                } else {
+                    document.getElementById('error-msg').style.display = 'block';
                 }
             }
 
-            map.createPane('pane_LOTFINAL_2');
-            map.getPane('pane_LOTFINAL_2').style.zIndex = 402;
-            
             /**
-             * PEMBINAAN LAYER GEOJSON & FUNGSI INTEGRASI
+             * 2. PEMULAAN PETA & DATA
              */
-            var layer_LOTFINAL_2 = new L.geoJson(json_LOTFINAL_2, {
-                pane: 'pane_LOTFINAL_2',
-                style: style_LOTFINAL_2_0,
-                onEachFeature: function(feature, layer) {
-                    var props = feature.properties;
-                    
-                    // 1. Labeling Lot secara automatik pada peta
-                    if (props['NO_LOT']) {
-                        layer.bindTooltip(props['NO_LOT'].toString(), {
-                            permanent: true, 
-                            direction: 'center', 
-                            className: 'lot-label'
-                        }).openTooltip();
+            var map;
+            var layer_LOTFINAL_2;
+            var layer_TANDASEMPADAN_3;
 
-                        // 2. Populasi Dropdown Sidebar
-                        var select = document.getElementById('lotSearchSelect');
-                        var option = document.createElement('option');
-                        option.value = props['NO_LOT'];
-                        option.text = "Lot " + props['NO_LOT'];
-                        select.appendChild(option);
-                    }
+            function initMap() {
+                map = L.map('map', { zoomControl: true }).setView([2.1036, 102.5226], 18);
 
-                    // 3. Event Listener: Klik Lot
-                    layer.on({
-                        click: function(e) {
-                            displayLotInfo(props);
-                            map.fitBounds(layer.getBounds(), { padding: [50, 50] });
-                            L.DomEvent.stopPropagation(e);
+                // Base Layer: Google Satellite
+                L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+                    attribution: 'Google Satellite'
+                }).addTo(map);
+
+                // Memproses Layer Lot (Poligon)
+                layer_LOTFINAL_2 = L.geoJson(json_LOTFINAL_2, {
+                    style: {
+                        color: '#333', weight: 2, fillColor: '#987db7', fillOpacity: 0.4
+                    },
+                    onEachFeature: function(feature, layer) {
+                        var props = feature.properties;
+                        
+                        // Menambah Label Multi-Baris (Lot, Pemilik, Daerah)
+                        if (props['NO_LOT']) {
+                            var labelText = "<b>LOT " + props['NO_LOT'] + "</b><br>" + 
+                                            (props['PEMILIK'] || 'Tiada Nama') + "<br>" + 
+                                            (props['DAERAH'] || '-');
+                            
+                            layer.bindTooltip(labelText, {
+                                permanent: true, direction: 'center', className: 'lot-label'
+                            });
+
+                            // Masukkan ke senarai dropdown
+                            var select = document.getElementById('lotSearchSelect');
+                            var opt = document.createElement('option');
+                            opt.value = props['NO_LOT'];
+                            opt.text = "Lot " + props['NO_LOT'] + " (" + (props['PEMILIK'] || 'N/A') + ")";
+                            select.appendChild(opt);
                         }
-                    });
+
+                        // Event Klik
+                        layer.on('click', function(e) {
+                            showDetails(props);
+                            map.fitBounds(layer.getBounds());
+                            L.DomEvent.stopPropagation(e);
+                        });
+                    }
+                }).addTo(map);
+
+                // Memproses Layer Vertices (Tanda Sempadan)
+                layer_TANDASEMPADAN_3 = L.geoJson(json_TANDASEMPADAN_3, {
+                    pointToLayer: function (feature, latlng) {
+                        return L.circleMarker(latlng, {
+                            radius: 5,
+                            fillColor: "#ff0000", // Vertices Merah
+                            color: "#ffffff",
+                            weight: 2,
+                            opacity: 1,
+                            fillOpacity: 1
+                        });
+                    }
+                }).addTo(map);
+
+                // Integrasi Carian Binokular
+                var searchCtrl = new L.Control.Search({
+                    layer: layer_LOTFINAL_2,
+                    propertyName: 'NO_LOT',
+                    marker: false,
+                    initial: false,
+                    zoom: 21,
+                    collapsed: true,
+                    textPlaceholder: 'Cari No Lot...'
+                });
+
+                searchCtrl.on('search:locationfound', function(e) {
+                    showDetails(e.layer.feature.properties);
+                });
+
+                map.addControl(searchCtrl);
+                
+                if (json_LOTFINAL_2) {
+                    map.fitBounds(layer_LOTFINAL_2.getBounds());
                 }
-            });
-            map.addLayer(layer_LOTFINAL_2);
-
-            /**
-             * FUNGSI: Papar Maklumat Terperinci di Sidebar
-             */
-            function displayLotInfo(props) {
-                var infoDiv = document.getElementById('lotInfo');
-                var content = document.getElementById('detailsContent');
-                
-                infoDiv.style.display = 'block';
-
-                var html = '<table class="info-table">';
-                html += '<tr><td class="label-key">NO LOT</td><td class="label-value">: ' + (props['NO_LOT'] || '-') + '</td></tr>';
-                html += '<tr><td class="label-key">KELUASAN</td><td class="label-value">: ' + (props['AREA'] || '-') + '</td></tr>';
-                html += '<tr><td class="label-key">DAERAH</td><td class="label-value">: ' + (props['DAERAH'] || '-') + '</td></tr>';
-                html += '<tr><td class="label-key">PEMILIK</td><td class="label-value">: ' + (props['PEMILIK'] || '-') + '</td></tr>';
-                html += '<tr><td class="label-key">STATUS</td><td class="label-value">: BERDAFTAR</td></tr>';
-                html += '</table>';
-                
-                content.innerHTML = html;
             }
 
             /**
-             * FUNGSI: Zoom ke Lot melalui Dropdown Sidebar
+             * 3. FUNGSI UTILITI
              */
-            function zoomToLot(lotNo) {
-                if (!lotNo) {
-                    document.getElementById('lotInfo').style.display = 'none';
-                    return;
-                }
+            function showDetails(p) {
+                var panel = document.getElementById('infoPanel');
+                var content = document.getElementById('infoContent');
+                panel.style.display = 'block';
                 
-                var found = false;
-                layer_LOTFINAL_2.eachLayer(function(layer) {
-                    if (layer.feature.properties['NO_LOT'] == lotNo) {
-                        map.fitBounds(layer.getBounds(), { padding: [100, 100] });
-                        displayLotInfo(layer.feature.properties);
-                        found = true;
+                content.innerHTML = `
+                    <table class="info-table">
+                        <tr><td class="td-label">NO LOT</td><td>: ${p['NO_LOT'] || '-'}</td></tr>
+                        <tr><td class="td-label">PEMILIK</td><td>: ${p['PEMILIK'] || '-'}</td></tr>
+                        <tr><td class="td-label">DAERAH</td><td>: ${p['DAERAH'] || '-'}</td></tr>
+                        <tr><td class="td-label">KELUASAN</td><td>: ${p['AREA'] || '-'}</td></tr>
+                        <tr><td class="td-label">KOORDINAT</td><td>: ${p['X'] || 'N/A'}, ${p['Y'] || 'N/A'}</td></tr>
+                    </table>
+                `;
+            }
+
+            function navigateLot(val) {
+                if (!val) return;
+                layer_LOTFINAL_2.eachLayer(function(l) {
+                    if (l.feature.properties['NO_LOT'] == val) {
+                        map.fitBounds(l.getBounds());
+                        showDetails(l.feature.properties);
                     }
                 });
             }
-
-            /**
-             * INTEGRASI SEARCH TAB (BINOCULARS) PADA PETA
-             */
-            var searchControl = new L.Control.Search({
-                layer: layer_LOTFINAL_2,
-                propertyName: 'NO_LOT', // Cari berdasarkan field No Lot
-                marker: false,
-                initial: false,
-                zoom: 20,
-                collapsed: true,
-                textPlaceholder: 'Cari No. Lot...',
-                hideMarkerOnCollapse: true,
-                moveToLocation: function(latlng, title, map) {
-                    map.setView(latlng, 21);
-                }
-            });
-
-            // Sinkronisasi: Apabila hasil carian dijumpai
-            searchControl.on('search:locationfound', function(e) {
-                if(e.layer && e.layer.feature) {
-                    displayLotInfo(e.layer.feature.properties);
-                    // Update juga dropdown supaya selari
-                    document.getElementById('lotSearchSelect').value = e.layer.feature.properties['NO_LOT'];
-                }
-            });
-
-            map.addControl(searchControl);
-
-            /**
-             * AUTO-FIT BOUNDS PADA PERMULAAN
-             */
-            if (json_LOTFINAL_2) {
-                map.fitBounds(layer_LOTFINAL_2.getBounds());
-            }
-
         </script>
     </body>
 </html>
