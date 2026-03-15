@@ -167,13 +167,21 @@
         <script src="js/labels.js"></script>
         <script src="js/leaflet-search.js"></script>
         
+        <script src="data/POLYGONIZEE_1.js"></script>
         <script src="data/LOTFINAL_2.js"></script>
         <script src="data/TANDASEMPADAN_3.js"></script>
 
         <script>
+            var map;
+            var layer_POLYGONIZEE_1;
+            var layer_LOTFINAL_2;
+            var layer_TANDASEMPADAN_3;
+            var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+
             function checkLogin() {
                 var u = document.getElementById('userInput').value;
                 var p = document.getElementById('passInput').value;
+                // Kredential: admin / 1234
                 if (u === "admin" && p === "1234") {
                     document.getElementById('login-screen').style.opacity = '0';
                     setTimeout(() => {
@@ -181,31 +189,33 @@
                         document.getElementById('app-header').style.display = 'block';
                         document.getElementById('main-content').style.display = 'flex';
                         initMap(); 
+                        map.invalidateSize();
                     }, 500);
                 } else {
                     document.getElementById('error-msg').style.display = 'block';
                 }
             }
 
-            var map;
-            var layer_LOTFINAL_2;
-            var layer_TANDASEMPADAN_3;
-
             function initMap() {
                 map = L.map('map', { zoomControl: true }).setView([2.1036, 102.5226], 18);
 
+                // Base Layer: Google Satellite
                 L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
                     attribution: 'Google Satellite'
                 }).addTo(map);
 
+                // Layer 1: POLYGONIZEE
+                layer_POLYGONIZEE_1 = L.geoJson(json_POLYGONIZEE_1, {
+                    style: { color: 'rgba(35,35,35,1.0)', weight: 1, fillColor: 'rgba(225,89,137,1.0)', fillOpacity: 0.6 }
+                }).addTo(map);
+
+                // Layer 2: LOT FINAL (Main Interaction)
                 layer_LOTFINAL_2 = L.geoJson(json_LOTFINAL_2, {
-                    style: {
-                        color: '#333', weight: 2, fillColor: '#987db7', fillOpacity: 0.4
-                    },
+                    style: { color: '#333', weight: 2, fillColor: '#987db7', fillOpacity: 0.4 },
                     onEachFeature: function(feature, layer) {
                         var props = feature.properties;
                         
-                        // LABEL: NO LOT, PEMILIK, DAERAH
+                        // 1. SET LABEL PADA PETA (No Lot, Pemilik, Daerah)
                         if (props['NO_LOT']) {
                             var labelText = "<b>LOT " + props['NO_LOT'] + "</b><br>" + 
                                             " OWNER: " + (props['PEMILIK'] || 'Tiada Nama') + "<br>" + 
@@ -215,6 +225,7 @@
                                 permanent: true, direction: 'center', className: 'lot-label'
                             });
 
+                            // 2. ISI DROPDOWN CARIAN SIDEBAR
                             var select = document.getElementById('lotSearchSelect');
                             var opt = document.createElement('option');
                             opt.value = props['NO_LOT'];
@@ -222,14 +233,16 @@
                             select.appendChild(opt);
                         }
 
+                        // 3. INTERAKSI KLIK PADA LOT
                         layer.on('click', function(e) {
                             showDetails(props);
-                            map.setView(e.latlng, 21); // Zoom in on click
+                            map.setView(e.latlng, 21);
                             L.DomEvent.stopPropagation(e);
                         });
                     }
                 }).addTo(map);
 
+                // Layer 3: TANDA SEMPADAN (Titik)
                 layer_TANDASEMPADAN_3 = L.geoJson(json_TANDASEMPADAN_3, {
                     pointToLayer: function (feature, latlng) {
                         return L.circleMarker(latlng, {
@@ -238,13 +251,13 @@
                     }
                 }).addTo(map);
 
-                // ADJUST ZOOM IN (KE LEVEL 21)
+                // KONFIGURASI CARIAN (BINOCULARS)
                 var searchCtrl = new L.Control.Search({
                     layer: layer_LOTFINAL_2,
                     propertyName: 'NO_LOT',
                     marker: false,
                     initial: false,
-                    zoom: 21, // Zoom Maksimum
+                    zoom: 21,
                     collapsed: true,
                     textPlaceholder: 'Cari No Lot...'
                 });
@@ -255,11 +268,15 @@
 
                 map.addControl(searchCtrl);
                 
+                // Tambah class font-awesome untuk ikon teropong
+                document.querySelector('.search-button').classList.add('fa', 'fa-binoculars');
+
                 if (json_LOTFINAL_2) {
                     map.fitBounds(layer_LOTFINAL_2.getBounds());
                 }
             }
 
+            // FUNGSI PAPAR MAKLUMAT DI SIDEBAR
             function showDetails(p) {
                 var panel = document.getElementById('infoPanel');
                 var content = document.getElementById('infoContent');
@@ -276,11 +293,12 @@
                 `;
             }
 
+            // FUNGSI NAVIGASI DARI DROPDOWN
             function navigateLot(val) {
                 if (!val) return;
                 layer_LOTFINAL_2.eachLayer(function(l) {
                     if (l.feature.properties['NO_LOT'] == val) {
-                        map.setView(l.getBounds().getCenter(), 21); // Zoom in on selection
+                        map.setView(l.getBounds().getCenter(), 21);
                         showDetails(l.feature.properties);
                     }
                 });
