@@ -11,7 +11,15 @@
         <link rel="stylesheet" href="css/fontawesome-all.min.css">
         
         <style>
-            /* --- CSS ROOT & LAYOUT --- */
+            /* --- ROOT & GLOBAL STYLES --- */
+            :root {
+                --primary-color: #1a237e;
+                --secondary-color: #e91e63;
+                --accent-color: #00c853;
+                --sidebar-width: 380px;
+                --transition-speed: 0.3s;
+            }
+
             html, body {
                 width: 100%;
                 height: 100%;
@@ -19,101 +27,134 @@
                 margin: 0;
                 display: flex;
                 flex-direction: column;
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                background-color: #f0f2f5;
+                font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+                background-color: #f4f7f6;
                 overflow: hidden;
             }
 
-            /* --- SISTEM LOGIN (OVERLAY) --- */
+            /* --- LOGIN OVERLAY SYSTEM --- */
             #login-screen {
                 position: fixed;
                 top: 0;
                 left: 0;
                 width: 100%;
                 height: 100%;
-                background: linear-gradient(45deg, #1a237e, #00c853);
+                background: linear-gradient(135deg, var(--primary-color) 0%, #0d47a1 100%);
                 display: flex;
                 justify-content: center;
                 align-items: center;
                 z-index: 10000;
-                transition: opacity 0.5s ease;
+                transition: opacity 0.6s ease-in-out;
             }
 
             .login-card {
                 background: white;
-                padding: 40px;
-                border-radius: 20px;
+                padding: 50px 40px;
+                border-radius: 25px;
                 width: 90%;
-                max-width: 400px;
+                max-width: 420px;
                 text-align: center;
-                box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+                box-shadow: 0 25px 50px rgba(0,0,0,0.3);
             }
 
             .login-card img {
-                width: 120px;
-                margin-bottom: 20px;
+                width: 140px;
+                margin-bottom: 25px;
+                filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
             }
 
             .login-card h2 {
-                margin-bottom: 25px;
-                color: #1a237e;
+                margin-bottom: 30px;
+                color: var(--primary-color);
                 font-weight: 800;
-                letter-spacing: 1px;
+                font-size: 24px;
+                letter-spacing: 1.5px;
+                text-transform: uppercase;
             }
 
             .login-card input {
                 width: 100%;
-                padding: 15px;
-                margin: 10px 0;
-                border: 2px solid #eee;
-                border-radius: 10px;
+                padding: 16px;
+                margin: 12px 0;
+                border: 2px solid #e0e0e0;
+                border-radius: 12px;
                 font-size: 16px;
                 box-sizing: border-box;
-                transition: 0.3s;
+                transition: var(--transition-speed);
             }
 
             .login-card input:focus {
-                border-color: #00c853;
+                border-color: var(--accent-color);
                 outline: none;
+                box-shadow: 0 0 10px rgba(0, 200, 83, 0.2);
             }
 
             .login-card button {
                 width: 100%;
-                padding: 15px;
-                margin-top: 20px;
-                background: #e91e63;
+                padding: 16px;
+                margin-top: 25px;
+                background: var(--secondary-color);
                 color: white;
                 border: none;
-                border-radius: 10px;
+                border-radius: 12px;
                 font-size: 18px;
                 font-weight: bold;
                 cursor: pointer;
-                transition: 0.3s;
+                transition: var(--transition-speed);
+                box-shadow: 0 4px 15px rgba(233, 30, 99, 0.3);
             }
 
             .login-card button:hover {
                 background: #c2185b;
-                transform: translateY(-2px);
+                transform: translateY(-3px);
+                box-shadow: 0 6px 20px rgba(233, 30, 99, 0.4);
             }
 
-            /* --- HEADER & NAVBAR --- */
+            /* --- HEADER & STATUS BAR --- */
             #app-header {
                 background: white;
-                padding: 15px 25px;
-                border-bottom: 5px solid #e91e63;
+                padding: 18px 30px;
+                border-bottom: 6px solid var(--secondary-color);
                 display: none;
                 justify-content: space-between;
                 align-items: center;
-                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                z-index: 500;
             }
 
             #app-header h1 {
                 margin: 0;
-                font-size: 20px;
-                color: #1a237e;
+                font-size: 22px;
+                color: var(--primary-color);
+                font-weight: 900;
+                letter-spacing: 0.5px;
             }
 
-            /* --- MAIN CONTAINER --- */
+            .status-indicator {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                font-size: 13px;
+                color: var(--accent-color);
+                font-weight: bold;
+            }
+
+            .status-dot {
+                height: 10px;
+                width: 10px;
+                background-color: var(--accent-color);
+                border-radius: 50%;
+                display: inline-block;
+                animation: blink 1.5s infinite;
+            }
+
+            @keyframes blink {
+                0% { opacity: 1; }
+                50% { opacity: 0.4; }
+                100% { opacity: 1; }
+            }
+
+            /* --- MAIN WRAPPER & SIDEBAR --- */
             #main-wrapper {
                 display: none;
                 flex: 1;
@@ -121,91 +162,174 @@
                 overflow: hidden;
             }
 
-            /* --- SIDEBAR PANEL --- */
             #sidebar-panel {
-                width: 380px;
+                width: var(--sidebar-width);
                 background: white;
-                border-right: 1px solid #ddd;
+                border-right: 1px solid #e0e0e0;
                 display: flex;
                 flex-direction: column;
-                padding: 20px;
+                padding: 25px;
                 box-sizing: border-box;
                 z-index: 1000;
+                box-shadow: 4px 0 15px rgba(0,0,0,0.05);
             }
 
-            .search-section {
-                margin-bottom: 30px;
-            }
-
-            .search-section h4 {
-                margin: 0 0 10px 0;
-                color: #666;
+            .section-title {
+                margin: 0 0 15px 0;
+                color: #555;
                 text-transform: uppercase;
                 font-size: 12px;
+                font-weight: 700;
+                letter-spacing: 1px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            /* --- SEARCH INTERFACE --- */
+            .search-container {
+                margin-bottom: 25px;
+                background: #f8f9fa;
+                padding: 15px;
+                border-radius: 15px;
+            }
+
+            #searchInput {
+                width: 100%;
+                padding: 14px;
+                margin-bottom: 12px;
+                border-radius: 10px;
+                border: 2px solid #ddd;
+                font-size: 14px;
+                box-sizing: border-box;
+                transition: var(--transition-speed);
+            }
+
+            #searchInput:focus {
+                border-color: var(--secondary-color);
+                background: white;
             }
 
             #lotSelector {
                 width: 100%;
-                padding: 12px;
-                border-radius: 8px;
+                padding: 14px;
+                border-radius: 10px;
                 border: 1px solid #ccc;
                 font-size: 14px;
+                background: white;
+                cursor: pointer;
             }
 
-            /* --- INFO DISPLAY --- */
+            /* --- INFORMATION DISPLAY BOX --- */
             #info-box {
                 flex: 1;
-                background: #fdfdfd;
-                border-radius: 12px;
-                padding: 20px;
+                background: #fff;
+                border-radius: 18px;
+                padding: 0;
                 border: 1px solid #eee;
                 display: none;
+                overflow-y: auto;
+                box-shadow: inset 0 2px 10px rgba(0,0,0,0.02);
+                margin-top: 10px;
             }
 
             .info-header {
-                background: #1a237e;
+                background: var(--primary-color);
                 color: white;
-                padding: 12px;
-                border-radius: 8px;
-                font-weight: bold;
-                margin-bottom: 15px;
+                padding: 15px;
+                border-radius: 15px 15px 0 0;
+                font-weight: 800;
                 text-align: center;
+                font-size: 14px;
+            }
+
+            .info-body {
+                padding: 15px;
             }
 
             .data-row {
                 display: flex;
                 justify-content: space-between;
-                padding: 12px 0;
-                border-bottom: 1px solid #f1f1f1;
+                align-items: center;
+                padding: 14px 0;
+                border-bottom: 1px solid #f5f5f5;
             }
 
-            .data-label { font-weight: bold; color: #777; font-size: 13px; }
-            .data-value { font-weight: 600; color: #333; font-size: 13px; text-align: right; }
-            .coord-val { color: #e91e63; font-family: 'Consolas', monospace; }
+            .data-row:last-child { border-bottom: none; }
+
+            .data-label {
+                font-weight: bold;
+                color: #888;
+                font-size: 12px;
+                text-transform: uppercase;
+            }
+
+            .data-value {
+                font-weight: 700;
+                color: #222;
+                font-size: 14px;
+                text-align: right;
+            }
+
+            .coord-val {
+                color: var(--secondary-color);
+                font-family: 'Consolas', 'Courier New', monospace;
+                background: #fff0f5;
+                padding: 2px 6px;
+                border-radius: 4px;
+            }
+
+            #copyBtn {
+                margin: 20px 15px;
+                width: calc(100% - 30px);
+                padding: 14px;
+                background: #333;
+                color: white;
+                border: none;
+                border-radius: 10px;
+                font-size: 13px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: var(--transition-speed);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 10px;
+            }
+
+            #copyBtn:hover { background: #000; }
 
             /* --- MAP CONTAINER --- */
             #map {
                 flex: 1;
                 height: 100%;
-                background: #eee;
+                z-index: 1;
             }
 
-            /* --- MAP TOOLTIP / LABEL STYLING --- */
+            /* --- LEAFLET CUSTOM STYLES --- */
             .lot-label-style {
-                background: rgba(255, 255, 255, 0.9);
-                border: 2px solid #e91e63;
-                border-radius: 5px;
-                padding: 2px 6px;
+                background: rgba(255, 255, 255, 0.95);
+                border: 2px solid var(--secondary-color);
+                border-radius: 6px;
+                padding: 3px 8px;
                 font-size: 11px;
-                font-weight: 800;
-                color: #000;
-                box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+                font-weight: 900;
+                color: #1a237e;
+                box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+                text-align: center;
+                white-space: nowrap;
             }
 
-            /* --- MOBILE VIEW --- */
+            /* --- MOBILE ADAPTATION --- */
             @media (max-width: 768px) {
                 #main-wrapper { flex-direction: column; }
-                #sidebar-panel { width: 100%; height: 350px; border-right: none; border-top: 3px solid #ddd; }
+                #sidebar-panel {
+                    width: 100%;
+                    height: 45%;
+                    border-right: none;
+                    border-top: 5px solid #ddd;
+                }
+                --sidebar-width: 100%;
             }
         </style>
     </head>
@@ -213,39 +337,54 @@
 
         <div id="login-screen">
             <div class="login-card">
-                <img src="poli logo.png" alt="Logo" onerror="this.style.display='none'">
-                <h2>DATA LOT JKA</h2>
-                <input type="text" id="userInput" placeholder="ID Pengguna">
-                <input type="password" id="passInput" placeholder="Kata Laluan">
-                <button onclick="handleLogin()">LOG MASUK</button>
-                <p style="font-size: 11px; color: #fff; margin-top: 15px;">Aplikasi WebGIS Poligon Lot PUO</p>
+                <img src="poli logo.png" alt="Logo PUO" onerror="this.style.display='none'">
+                <h2>Sistem WebGIS Lot</h2>
+                <div style="text-align: left; margin-bottom: 15px;">
+                    <label style="font-size: 12px; font-weight: bold; color: #666;">ID PENGGUNA</label>
+                    <input type="text" id="userInput" placeholder="Contoh: admin">
+                    <label style="font-size: 12px; font-weight: bold; color: #666;">KATA LALUAN</label>
+                    <input type="password" id="passInput" placeholder="••••••••">
+                </div>
+                <button onclick="handleLogin()">MASUK SISTEM</button>
+                <p style="font-size: 11px; color: #eee; margin-top: 20px; opacity: 0.8;">Jabatan Kejuruteraan Awam PUO &copy; 2026</p>
             </div>
         </div>
 
         <header id="app-header">
             <h1>SISTEM MAKLUMAT LOT (PUO-GIS)</h1>
-            <div id="status" style="font-size: 12px; color: #00c853; font-weight: bold;">● SYSTEM ONLINE</div>
+            <div class="status-indicator">
+                <span class="status-dot"></span>
+                <span>SYSTEM ACTIVE</span>
+            </div>
         </header>
 
         <div id="main-wrapper">
             <aside id="sidebar-panel">
-                <div class="search-section">
-                    <h4>Carian Berasaskan No Lot</h4>
+                <div class="search-container">
+                    <div class="section-title">
+                        <i class="fas fa-search"></i> CARIAN DATA LOT
+                    </div>
+                    <input type="text" id="searchInput" placeholder="Cari No. Lot..." onkeyup="filterLots()">
                     <select id="lotSelector" onchange="zoomToLot(this.value)">
-                        <option value="">-- Pilih Lot --</option>
+                        <option value="">-- PILIH LOT DARI SENARAI --</option>
                     </select>
                 </div>
 
                 <div id="info-box">
-                    <div class="info-header">MAKLUMAT HAKMILIK</div>
-                    <div id="dynamic-content">
+                    <div class="info-header">DETAIL MAKLUMAT HAKMILIK</div>
+                    <div class="info-body" id="dynamic-content">
                         </div>
-                    <button id="copyBtn" style="margin-top:20px; width:100%; padding:10px; background:#444; color:white; border:none; border-radius:8px; cursor:pointer; font-size:12px;">
-                        SALIN SEMUA KOORDINAT
+                    <button id="copyBtn">
+                        <i class="fas fa-copy"></i> SALIN DATA KOORDINAT
                     </button>
                 </div>
                 
-                <p style="margin-top: auto; font-size: 10px; color: #999; text-align: center;">Developed for Civil Engineering Dept © 2026</p>
+                <div style="margin-top: auto; padding-top: 20px; border-top: 1px solid #eee;">
+                    <p style="font-size: 10px; color: #aaa; text-align: center; line-height: 1.5;">
+                        Sistem ini menggunakan Data Geospatial JUPEM & Google Hybrid.<br>
+                        <strong>Versi: 2.5.0 (Final Stable)</strong>
+                    </p>
+                </div>
             </aside>
 
             <div id="map"></div>
@@ -255,154 +394,220 @@
         <script src="data/LOTFINAL_2.js"></script>
 
         <script>
+            /**
+             * GLOBAL VARIABLES
+             */
             var map;
             var lotLayer;
+            var vertexGroup = L.layerGroup(); // Menampung semua titik bucu
 
             /**
-             * 1. FUNGSI LOGIN
+             * 1. LOGIN HANDLER
              */
             function handleLogin() {
                 const u = document.getElementById('userInput').value;
                 const p = document.getElementById('passInput').value;
 
-                // Kredential Sederhana
+                // Kredential Simple
                 if(u === "admin" && p === "1234") {
-                    document.getElementById('login-screen').style.display = 'none';
-                    document.getElementById('app-header').style.display = 'flex';
-                    document.getElementById('main-wrapper').style.display = 'flex';
-                    initWebGIS();
+                    var screen = document.getElementById('login-screen');
+                    screen.style.opacity = '0';
+                    setTimeout(() => {
+                        screen.style.display = 'none';
+                        document.getElementById('app-header').style.display = 'flex';
+                        document.getElementById('main-wrapper').style.display = 'flex';
+                        initWebGIS();
+                    }, 600);
                 } else {
-                    alert("ID atau Kata Laluan Salah!");
+                    alert("Akses Ditolak: ID atau Kata Laluan Salah!");
                 }
             }
 
             /**
-             * 2. PEMULAAAN PETA (INITIALIZATION)
+             * 2. INITIALIZE MAP & LAYERS
              */
             function initWebGIS() {
-                // Setup Map Object dengan kawalan Zoom
+                // Konfigurasi Peta
                 map = L.map('map', {
-                    zoomControl: true,
+                    zoomControl: false, // Kita akan letak di posisi lain
                     maxZoom: 22,
-                    minZoom: 5
+                    minZoom: 5,
+                    preferCanvas: true
                 }).setView([2.1036, 102.5226], 19);
 
-                // Base Layer: Google Hybrid (Satelit + Jalan)
-                L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+                // Tambah Zoom Control secara manual
+                L.control.zoom({ position: 'topright' }).addTo(map);
+
+                // Base Layer: Google Hybrid (Satelit & Jalan)
+                var googleHybrid = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
                     maxZoom: 22,
-                    attribution: 'Google Satellite'
+                    attribution: '&copy; Google Maps'
                 }).addTo(map);
 
-                // Tambah Skala
-                L.control.scale({position: 'bottomright'}).addTo(map);
+                // Skala
+                L.control.scale({ position: 'bottomright', imperial: false }).addTo(map);
+                
+                // Masukkan group bucu ke peta
+                vertexGroup.addTo(map);
 
-                // Memuatkan Data dari fail LOTFINAL_2.js (GitHub Source)
+                // Jalankan render data
                 renderLotData();
             }
 
             /**
-             * 3. PEMPROSESAN DATA GEOJSON
+             * 3. RENDER DATA LOT & BUCU
              */
             function renderLotData() {
+                if (typeof json_LOTFINAL_2 === 'undefined') {
+                    console.error("Data LOTFINAL_2 tidak ditemui!");
+                    return;
+                }
+
                 lotLayer = L.geoJson(json_LOTFINAL_2, {
                     style: function(feature) {
                         return {
-                            color: '#000000',
+                            color: '#000',
                             weight: 2,
                             fillColor: '#2196f3',
-                            fillOpacity: 0.1
+                            fillOpacity: 0.15,
+                            dashArray: ''
                         };
                     },
                     onEachFeature: function(feature, layer) {
                         var props = feature.properties;
-                        
-                        // Pemetaan Kolum dari Database GitHub
                         var idLot = props['NO_LOT'] || 'N/A';
-                        var owner = props['tsp — pe'] || props['TSP-PEMILIK'] || 'TIADA NAMA';
+                        var owner = props['tsp — pe'] || props['TSP-PEMILIK'] || 'PEMILIK TIDAK DIKETAHUI';
                         var area = props['AREA'] || '0.00';
-                        var district = props['tsp — ha'] || props['TSP-HAKMILIK'] || 'TIADA DAERAH';
+                        var district = props['tsp — ha'] || props['TSP-HAKMILIK'] || 'DAERAH';
 
                         // Kemas kini Dropdown Sidebar
                         var sel = document.getElementById('lotSelector');
                         var opt = document.createElement('option');
                         opt.value = idLot;
-                        opt.text = "Lot " + idLot + " (" + owner + ")";
+                        opt.text = "Lot " + idLot + " [" + owner.substring(0, 15) + "...]";
                         sel.appendChild(opt);
 
-                        // Tambah Label pada setiap Lot (Tengah Poligon)
+                        // Tooltip Label (Tengah)
                         layer.bindTooltip("<b>" + idLot + "</b>", {
                             permanent: true,
                             direction: 'center',
                             className: 'lot-label-style'
                         });
 
-                        // Event: Klik Lot
+                        // JANA BUCU (VERTICES)
+                        generateVertices(feature);
+
+                        // Click Interaction
                         layer.on('click', function(e) {
-                            // Ambil koordinat asal (WGS84)
-                            var lat = e.latlng.lat.toFixed(7);
-                            var lng = e.latlng.lng.toFixed(7);
+                            var center = layer.getBounds().getCenter();
+                            var clickLat = e.latlng ? e.latlng.lat : center.lat;
+                            var clickLng = e.latlng ? e.latlng.lng : center.lng;
 
-                            // Highlight Kesan Klik
-                            lotLayer.setStyle({ fillColor: '#2196f3', fillOpacity: 0.1, weight: 2 });
-                            layer.setStyle({ fillColor: '#ffeb3b', fillOpacity: 0.4, weight: 4 });
+                            // Highlight Style
+                            lotLayer.setStyle({ fillColor: '#2196f3', fillOpacity: 0.15, weight: 2 });
+                            layer.setStyle({ fillColor: '#ffff00', fillOpacity: 0.4, weight: 4, color: '#e91e63' });
 
-                            // Fokus Peta
-                            map.fitBounds(layer.getBounds());
+                            // Zoom ke Lot
+                            map.fitBounds(layer.getBounds(), { padding: [100, 100], maxZoom: 20 });
 
-                            // Papar Maklumat di Sidebar
-                            displayMetadata(idLot, owner, area, district, lat, lng);
+                            // Papar Info Sidebar
+                            displayMetadata(idLot, owner, area, district, clickLat.toFixed(7), clickLng.toFixed(7));
 
-                            // Papar Popup di Peta
+                            // Popup Info
                             L.popup()
-                                .setLatLng(e.latlng)
-                                .setContent("<b>Lot " + idLot + "</b><br>Lat: " + lat + "<br>Lng: " + lng)
+                                .setLatLng(e.latlng || center)
+                                .setContent("<div style='text-align:center;'><b>LOT " + idLot + "</b><br><small>Sila rujuk sidebar untuk maklumat lanjut</small></div>")
                                 .openOn(map);
                         });
                     }
                 }).addTo(map);
 
-                // Zoom ke kawasan data secara automatik
-                if (json_LOTFINAL_2) {
-                    map.fitBounds(lotLayer.getBounds());
+                // Auto bounds ke semua data
+                map.fitBounds(lotLayer.getBounds());
+            }
+
+            /**
+             * 4. GENERATE VERTICES (BUCU) FUNCTION
+             */
+            function generateVertices(feature) {
+                if (!feature.geometry || !feature.geometry.coordinates) return;
+
+                var coords = feature.geometry.coordinates;
+                var type = feature.geometry.type;
+
+                // Fungsi untuk lukis titik bucu
+                var drawPoint = function(lng, lat) {
+                    L.circleMarker([lat, lng], {
+                        radius: 3.5,
+                        fillColor: "#ff0000",
+                        color: "#ffffff",
+                        weight: 1.5,
+                        opacity: 1,
+                        fillOpacity: 1,
+                        interactive: true
+                    }).addTo(vertexGroup)
+                      .bindPopup("<b>Bucu Lot " + (feature.properties['NO_LOT'] || "") + "</b><br>Lat: " + lat.toFixed(7) + "<br>Lng: " + lng.toFixed(7));
+                };
+
+                // Handle Polygon & MultiPolygon
+                if (type === "Polygon") {
+                    coords[0].forEach(p => drawPoint(p[0], p[1]));
+                } else if (type === "MultiPolygon") {
+                    coords.forEach(poly => {
+                        poly[0].forEach(p => drawPoint(p[0], p[1]));
+                    });
                 }
             }
 
             /**
-             * 4. PAPARAN MAKLUMAT SIDEBAR (METADATA)
+             * 5. SEARCH & FILTER SYSTEM
              */
-            function displayMetadata(lot, owner, area, dist, lat, lng) {
-                var infoBox = document.getElementById('info-box');
-                var content = document.getElementById('dynamic-content');
-                
-                infoBox.style.display = 'block';
-                content.innerHTML = `
-                    <div class="data-row"><span class="data-label">NO. LOT</span><span class="data-value">${lot}</span></div>
-                    <div class="data-row"><span class="data-label">PEMILIK</span><span class="data-value">${owner}</span></div>
-                    <div class="data-row"><span class="data-label">DAERAH</span><span class="data-value">${dist}</span></div>
-                    <div class="data-row"><span class="data-label">LUAS</span><span class="data-value">${area} m²</span></div>
-                    <div class="data-row"><span class="data-label" style="color:#d63384;">LATITUDE</span><span class="data-value coord-val">${lat}</span></div>
-                    <div class="data-row"><span class="data-label" style="color:#d63384;">LONGITUDE</span><span class="data-value coord-val">${lng}</span></div>
-                `;
+            function filterLots() {
+                var input = document.getElementById('searchInput').value.toUpperCase();
+                var select = document.getElementById('lotSelector');
+                var options = select.getElementsByTagName('option');
 
-                // Fungsi Salin (Copy)
-                document.getElementById('copyBtn').onclick = function() {
-                    var txt = "Lot: " + lot + "\nLat: " + lat + "\nLng: " + lng;
-                    navigator.clipboard.writeText(txt).then(() => {
-                        alert("Data Lot " + lot + " telah disalin!");
-                    });
-                };
+                for (var i = 1; i < options.length; i++) {
+                    var txt = options[i].text || options[i].innerText;
+                    options[i].style.display = (txt.toUpperCase().indexOf(input) > -1) ? "" : "none";
+                }
+            }
+
+            function zoomToLot(lotNo) {
+                if(!lotNo) return;
+                var found = false;
+                lotLayer.eachLayer(function(layer) {
+                    if(layer.feature.properties['NO_LOT'] == lotNo) {
+                        layer.fire('click');
+                        found = true;
+                    }
+                });
+                if(!found) console.warn("Lot " + lotNo + " tidak ditemui.");
             }
 
             /**
-             * 5. FUNGSI CARIAN (ZOOM)
+             * 6. METADATA DISPLAY
              */
-            function zoomToLot(lotNo) {
-                if(!lotNo) return;
-                lotLayer.eachLayer(function(l) {
-                    if(l.feature.properties['NO_LOT'] == lotNo) {
-                        l.fire('click');
-                    }
-                });
+            function displayMetadata(lot, owner, area, dist, lat, lng) {
+                var box = document.getElementById('info-box');
+                var content = document.getElementById('dynamic-content');
+                
+                box.style.display = 'block';
+                content.innerHTML = `
+                    <div class="data-row"><span class="data-label">Nombor Lot</span><span class="data-value">${lot}</span></div>
+                    <div class="data-row"><span class="data-label">Nama Pemilik</span><span class="data-value">${owner}</span></div>
+                    <div class="data-row"><span class="data-label">Keluasan</span><span class="data-value">${area} m&sup2;</span></div>
+                    <div class="data-row"><span class="data-label">Daerah/Mukim</span><span class="data-value">${dist}</span></div>
+                    <div class="data-row"><span class="data-label">Latitude</span><span class="data-value coord-val">${lat}</span></div>
+                    <div class="data-row"><span class="data-label">Longitude</span><span class="data-value coord-val">${lng}</span></div>
+                `;
+
+                document.getElementById('copyBtn').onclick = function() {
+                    var text = `Lot: ${lot}\nPemilik: ${owner}\nLuas: ${area}\nLat: ${lat}, Lng: ${lng}`;
+                    navigator.clipboard.writeText(text).then(() => {
+                        alert("Data Lot " + lot + " telah disalin ke papan klip!");
+                    });
+                };
             }
         </script>
     </body>
