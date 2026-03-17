@@ -406,13 +406,6 @@
                         opt.text = "LOT " + lotId;
                         sel.appendChild(opt);
 
-                        // Label No Lot di Tengah Poligon
-                        layer.bindTooltip("<b>" + lotId + "</b>", {
-                            permanent: true,
-                            direction: 'center',
-                            className: 'lot-label-style'
-                        });
-
                         // JANA BUCU (VERTICES) SECARA AUTOMATIK
                         extractVertices(feature);
 
@@ -465,6 +458,13 @@
             /**
              * --- UI & SIDEBAR INTERACTION ---
              */
+            <aside id="sidebar-panel">
+    <div id="toggle-sidebar" onclick="toggleSidebar()">
+        <i id="arrow-icon" class="fas fa-chevron-left"></i>
+    </div>
+    
+    <div class="sidebar-content">
+        ```
             function highlightSelection(layer) {
                 // Reset semua style
                 lotLayer.setStyle({ fillColor: '#2196f3', fillOpacity: 0.1, weight: 2 });
@@ -517,6 +517,22 @@
                     alert("Data Lot Berjaya Disalin!");
                 });
             }
+             function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar-panel');
+    const icon = document.getElementById('arrow-icon');
+    
+    sidebar.classList.toggle('sidebar-hidden');
+    
+    // Tukar arah arrow
+    if (sidebar.classList.contains('sidebar-hidden')) {
+        icon.classList.replace('fa-chevron-left', 'fa-chevron-right');
+    } else {
+        icon.classList.replace('fa-chevron-right', 'fa-chevron-left');
+    }
+    
+    // Paksa map untuk resize supaya tidak lari (Leaflet fix)
+    setTimeout(() => { map.invalidateSize(); }, 400);
+}
 
             /**
              * --- SYSTEM LOGGING ---
