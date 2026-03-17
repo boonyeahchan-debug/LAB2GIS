@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <title>SISTEM MAKLUMAT TANAH JKA PUO | V5.0 SUPER FINAL</title>
+    <title>SISTEM MAKLUMAT TANAH </title>
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
@@ -129,16 +129,16 @@
     <div id="auth-overlay">
         <div class="login-box">
             <img src="https://raw.githubusercontent.com/boonyeahchan-debug/LAB2GIS/main/poli%20logo.png" alt="PUO Logo">
-            <h1>SISTEM WEB-GIS JKA</h1>
-            <p style="color:#666; font-size:12px; margin-bottom:25px;">Jabatan Kejuruteraan Awam, PUO</p>
+            <h1>SISTEM WEB-GIS</h1>
+            <p style="color:#666; font-size:12px; margin-bottom:25px;">Jabatan Kejuruteraan Awam, POlITEKNIK UNGKU OMAR</p>
             
             <div class="field">
-                <label>ID Kakitangan / Pelajar</label>
+                <label>ID PENGGUNA</label>
                 <input type="text" id="user_id" placeholder="Masukkan ID (Contoh: 1, 2, 3)">
             </div>
             <div class="field" style="margin-bottom:25px;">
-                <label>Kata Laluan Master</label>
-                <input type="password" id="user_key" placeholder="••••••••">
+                <label>KATA LALUAN </label>
+                <input type="password" id="user_key" placeholder="••••">
             </div>
             
             <button class="btn-submit" onclick="validateAccess()">SAHKAN IDENTITI</button>
@@ -151,7 +151,6 @@
             <img src="https://raw.githubusercontent.com/boonyeahchan-debug/LAB2GIS/main/poli%20logo.png" height="40">
             <div>
                 <h2 style="font-size:16px; color:var(--puo-blue); font-weight:800; letter-spacing:-0.5px;">SISTEM PENGURUSAN LOT TANAH</h2>
-                <small style="color:#888; font-weight:700; font-size:10px;">VERSION 5.0 SUPER FINAL (STABLE)</small>
             </div>
         </div>
         <div style="display:flex; align-items:center; gap:20px;">
@@ -177,7 +176,7 @@
                 </div>
                 <input type="text" id="lot-search" class="search-box" onkeyup="filterLotList()" placeholder="Cari No Lot (cth: 1234)...">
                 <select id="lot-dropdown" class="search-box" style="margin-bottom:0;" onchange="navigateToLot(this.value)">
-                    <option value="">-- SENARAI LOT DIKESAN --</option>
+                    <option value="">-- SENARAI LOT  --</option>
                 </select>
             </div>
 
@@ -188,7 +187,7 @@
                         </table>
                     <div style="padding:15px; display:flex; gap:10px;">
                         <button class="btn-action" style="background:#eee;" onclick="copyData()">SALIN</button>
-                        <button class="btn-action" style="background:var(--puo-blue); color:white;" onclick="alert('Menjana Pelan Lot...')">CETAK PELAN</button>
+                        <button class="btn-action" style="background:var(--puo-blue); color:white;" onclick="alert('Menjana Pelan Lot...')">MUAT TURUN</button>
                     </div>
                 </div>
 
