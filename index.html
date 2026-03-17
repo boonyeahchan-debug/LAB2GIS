@@ -4,629 +4,389 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <title>SISTEM PENGURUSAN LOT WEBGIS V3.5 | JKA PUO</title>
+    <title>SISTEM MAKLUMAT TANAH JKA PUO | V5.0 SUPER FINAL</title>
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
     
     <style>
-        /* --- 1. CSS VARIABLES & ROOT --- */
         :root {
-            --primary: #1a237e;
-            --primary-light: #534bae;
-            --primary-dark: #000051;
-            --secondary: #e91e63;
-            --accent: #00e5ff;
-            --success: #00c853;
-            --warning: #ffd600;
-            --danger: #ff1744;
-            --bg-glass: rgba(255, 255, 255, 0.9);
+            --puo-blue: #1a237e;
+            --puo-gold: #ffd600;
+            --accent-pink: #e91e63;
+            --bg-main: #f4f7f9;
             --sidebar-width: 420px;
-            --header-height: 75px;
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --glass: rgba(255, 255, 255, 0.9);
+            --shadow: 0 8px 32px rgba(0,0,0,0.1);
         }
 
-        /* --- 2. GLOBAL RESET --- */
+        /* RESET & BASE */
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-main); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #f0f2f5;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
+        /* 1. AUTHENTICATION OVERLAY */
+        #auth-overlay {
+            position: fixed; inset: 0; z-index: 9999;
+            background: linear-gradient(135deg, var(--puo-blue) 0%, #000 100%);
+            display: flex; align-items: center; justify-content: center;
+            transition: transform 0.8s cubic-bezier(0.87, 0, 0.13, 1);
         }
 
-        /* --- 3. LOGIN SCREEN (ADVANCED) --- */
-        #login-screen {
-            position: fixed;
-            inset: 0;
-            background: radial-gradient(circle at top right, var(--primary-light), #000);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-            transition: transform 0.8s ease-in-out, opacity 0.5s;
+        .login-box {
+            background: var(--glass); backdrop-filter: blur(10px);
+            padding: 40px; border-radius: 24px; width: 400px; text-align: center;
+            box-shadow: var(--shadow); border: 1px solid rgba(255,255,255,0.2);
         }
 
-        .login-container {
-            background: var(--bg-glass);
-            backdrop-filter: blur(15px);
-            padding: 50px;
-            border-radius: 30px;
-            width: 100%;
-            max-width: 480px;
-            text-align: center;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.3);
-        }
-
-        .login-container img {
-            width: 140px;
-            margin-bottom: 20px;
-            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.1));
-        }
-
-        .login-container h2 {
-            color: var(--primary);
-            font-weight: 800;
-            font-size: 24px;
-            margin-bottom: 10px;
-            letter-spacing: -0.5px;
-        }
-
-        .login-container p {
-            color: #666;
-            font-size: 14px;
-            margin-bottom: 30px;
-        }
-
-        .form-group {
-            text-align: left;
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--primary-dark);
-            margin-bottom: 8px;
-            text-transform: uppercase;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 15px 20px;
-            border-radius: 15px;
-            border: 2px solid #eee;
-            background: white;
-            font-size: 16px;
-            transition: var(--transition);
-        }
-
-        .form-group input:focus {
-            border-color: var(--secondary);
-            outline: none;
-            box-shadow: 0 0 0 4px rgba(233, 30, 99, 0.1);
-        }
-
-        .btn-login {
-            width: 100%;
-            padding: 16px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 15px;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: var(--transition);
-            box-shadow: 0 10px 20px rgba(26, 35, 126, 0.2);
-        }
-
-        .btn-login:hover {
-            background: var(--secondary);
-            transform: translateY(-2px);
-            box-shadow: 0 15px 30px rgba(233, 30, 99, 0.3);
-        }
-
-        /* --- 4. MAIN APP LAYOUT --- */
-        #app-header {
-            height: var(--header-height);
-            background: white;
-            display: none;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 30px;
-            border-bottom: 4px solid var(--secondary);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            z-index: 1000;
-        }
-
-        .header-brand { display: flex; align-items: center; gap: 15px; }
-        .header-brand h1 { font-size: 20px; color: var(--primary); font-weight: 800; }
+        .login-box img { width: 120px; margin-bottom: 20px; }
+        .login-box h1 { font-weight: 800; color: var(--puo-blue); font-size: 22px; margin-bottom: 5px; }
         
-        .user-profile {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: #f8f9fa;
-            padding: 8px 15px;
-            border-radius: 50px;
-            border: 1px solid #eee;
+        .field { text-align: left; margin-bottom: 15px; }
+        .field label { font-size: 11px; font-weight: 700; color: #555; text-transform: uppercase; margin-bottom: 5px; display: block; }
+        .field input { width: 100%; padding: 12px; border-radius: 10px; border: 2px solid #ddd; font-size: 14px; transition: 0.3s; }
+        .field input:focus { border-color: var(--puo-blue); outline: none; }
+
+        .btn-submit {
+            width: 100%; padding: 14px; background: var(--puo-blue); color: white;
+            border: none; border-radius: 10px; font-weight: 800; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(26, 35, 126, 0.3); transition: 0.3s;
+        }
+        .btn-submit:hover { background: var(--accent-pink); transform: translateY(-2px); }
+
+        /* 2. APP LAYOUT */
+        header {
+            height: 70px; background: white; border-bottom: 3px solid var(--puo-gold);
+            display: none; align-items: center; justify-content: space-between;
+            padding: 0 25px; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
 
-        #main-container {
-            display: none;
-            flex: 1;
-            position: relative;
-            overflow: hidden;
-        }
+        #content-wrapper { display: none; flex: 1; position: relative; }
 
-        /* --- 5. SIDEBAR (SCROLLABLE) --- */
+        /* 3. SIDEBAR */
         #sidebar {
-            width: var(--sidebar-width);
-            background: white;
-            border-right: 1px solid #e0e0e0;
-            display: flex;
-            flex-direction: column;
-            z-index: 999;
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            width: var(--sidebar-width); background: white; border-right: 1px solid #e0e0e0;
+            display: flex; flex-direction: column; z-index: 900;
         }
 
-        .sidebar-header {
-            padding: 25px;
-            background: linear-gradient(to right, #f8f9fa, #ffffff);
-            border-bottom: 1px solid #eee;
-        }
+        .sidebar-header { padding: 25px; background: #fdfdfd; border-bottom: 1px solid #eee; }
+        .sidebar-content { flex: 1; overflow-y: auto; padding: 20px; }
 
-        .stat-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 15px;
-        }
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .stat-item { background: var(--puo-blue); color: white; padding: 15px; border-radius: 12px; }
+        .stat-item small { font-size: 9px; text-transform: uppercase; opacity: 0.7; font-weight: 700; }
+        .stat-item h2 { font-size: 18px; margin-top: 5px; }
 
-        .stat-card {
-            background: var(--primary);
-            color: white;
-            padding: 15px;
-            border-radius: 12px;
-            text-align: center;
-        }
-
-        .stat-card span { font-size: 10px; opacity: 0.8; text-transform: uppercase; }
-        .stat-card h3 { font-size: 18px; margin-top: 5px; }
-
-        .sidebar-scroll {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-        }
-
-        .section-title {
-            font-size: 11px;
-            font-weight: 800;
-            color: #999;
-            text-transform: uppercase;
-            margin: 20px 0 10px 0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .section-title::after { content: ""; flex: 1; height: 1px; background: #eee; }
-
-        /* --- 6. INFO BOX & TABLES --- */
-        #info-card {
-            background: white;
-            border-radius: 20px;
-            border: 1px solid #eee;
-            overflow: hidden;
-            display: none;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            animation: slideIn 0.4s ease-out;
-        }
-
-        @keyframes slideIn { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform: translateY(0); } }
-
-        .info-header {
-            background: var(--primary);
-            color: white;
-            padding: 15px 20px;
-            font-weight: 700;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .data-table tr { border-bottom: 1px solid #f8f9fa; }
-        .data-table td { padding: 12px 20px; font-size: 14px; }
-        .label-cell { color: #888; font-weight: 600; width: 40%; }
-        .value-cell { color: #222; font-weight: 700; text-align: right; }
-
-        /* --- 7. MAP CONTROLS --- */
+        /* 4. MAP TOOLS */
         #map { flex: 1; position: relative; }
+        
+        .vertex-marker {
+            background: #ff1744; border: 2px solid white; border-radius: 50%;
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+        }
 
         .lot-label {
-            background: transparent !important;
-            border: none !important;
-            box-shadow: none !important;
-            color: #fff;
-            font-weight: 800;
-            font-size: 13px;
-            text-shadow: 2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
-            pointer-events: none;
+            background: transparent !important; border: none !important;
+            color: white; font-weight: 800; text-shadow: 2px 2px 4px #000;
+            pointer-events: none; font-size: 14px;
         }
 
-        .map-tools {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+        /* 5. DATA CARD */
+        .info-card {
+            background: white; border-radius: 16px; border: 1px solid #eee;
+            box-shadow: var(--shadow); display: none; overflow: hidden; margin-top: 15px;
+        }
+        .info-card-header { background: var(--puo-blue); color: white; padding: 12px 20px; font-weight: 700; font-size: 13px; }
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table tr { border-bottom: 1px solid #f5f5f5; }
+        .data-table td { padding: 12px 20px; font-size: 13px; }
+        .data-table td:first-child { color: #777; font-weight: 600; width: 40%; }
+        .data-table td:last-child { color: #111; font-weight: 700; text-align: right; }
+
+        /* 6. TERMINAL */
+        #console {
+            height: 120px; background: #121212; color: #00ff41;
+            font-family: 'JetBrains Mono', monospace; font-size: 11px;
+            padding: 10px; overflow-y: auto; border-top: 2px solid #333;
         }
 
-        .tool-btn {
-            width: 45px;
-            height: 45px;
-            background: white;
-            border: none;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 18px;
-            color: var(--primary);
-            transition: var(--transition);
+        /* UTILS */
+        .search-box {
+            width: 100%; padding: 14px; border-radius: 12px; border: 2px solid #eee;
+            margin-bottom: 10px; font-weight: 600; transition: 0.3s;
         }
+        .search-box:focus { border-color: var(--accent-pink); outline: none; }
 
-        .tool-btn:hover { background: var(--primary); color: white; }
-
-        /* --- 8. LOG PANEL --- */
-        #activity-log {
-            height: 120px;
-            background: #1e1e1e;
-            color: #00ff00;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 11px;
-            padding: 10px;
-            overflow-y: auto;
-            border-top: 2px solid #333;
+        .btn-action {
+            flex: 1; padding: 10px; border-radius: 8px; border: none;
+            cursor: pointer; font-weight: 700; font-size: 12px; transition: 0.2s;
         }
-
-        /* --- 9. UTILITIES --- */
-        .hidden { display: none !important; }
-        .pulse { animation: pulse-anim 2s infinite; }
-        @keyframes pulse-anim {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 200, 83, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(0, 200, 83, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 200, 83, 0); }
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #999; }
 
     </style>
 </head>
 <body>
 
-    <div id="login-screen">
-        <div class="login-container">
+    <div id="auth-overlay">
+        <div class="login-box">
             <img src="https://raw.githubusercontent.com/boonyeahchan-debug/LAB2GIS/main/poli%20logo.png" alt="PUO Logo">
-            <h2>SISTEM MAKLUMAT LOT</h2>
-            <p>Jabatan Kejuruteraan Awam, PUO</p>
+            <h1>SISTEM WEB-GIS JKA</h1>
+            <p style="color:#666; font-size:12px; margin-bottom:25px;">Jabatan Kejuruteraan Awam, PUO</p>
             
-            <div id="auth-box">
-                <div class="form-group">
-                    <label>ID Pengguna</label>
-                    <input type="text" id="uid" placeholder="Masukkan ID (1, 2, atau 3)">
-                </div>
-                <div class="form-group">
-                    <label>Kata Laluan Master</label>
-                    <input type="password" id="ups" placeholder="••••••••">
-                </div>
-                <button class="btn-login" onclick="handleAuth()">SAHKAN & MASUK</button>
-                <div id="auth-msg" style="margin-top:15px; font-size:12px; color:var(--danger); font-weight:700;"></div>
+            <div class="field">
+                <label>ID Kakitangan / Pelajar</label>
+                <input type="text" id="user_id" placeholder="Masukkan ID (Contoh: 1, 2, 3)">
             </div>
+            <div class="field" style="margin-bottom:25px;">
+                <label>Kata Laluan Master</label>
+                <input type="password" id="user_key" placeholder="••••••••">
+            </div>
+            
+            <button class="btn-submit" onclick="validateAccess()">SAHKAN IDENTITI</button>
+            <div id="login-feedback" style="margin-top:15px; color:var(--accent-pink); font-size:11px; font-weight:700;"></div>
         </div>
     </div>
 
-    <header id="app-header">
-        <div class="header-brand">
-            <img src="https://raw.githubusercontent.com/boonyeahchan-debug/LAB2GIS/main/poli%20logo.png" height="45">
+    <header id="main-header">
+        <div style="display:flex; align-items:center; gap:15px;">
+            <img src="https://raw.githubusercontent.com/boonyeahchan-debug/LAB2GIS/main/poli%20logo.png" height="40">
             <div>
-                <h1>LOT-MANAGEMENT SYSTEM</h1>
-                <small style="color:#888; font-weight:600;">JKA GEOSPATIAL ENGINE V3.5</small>
+                <h2 style="font-size:16px; color:var(--puo-blue); font-weight:800; letter-spacing:-0.5px;">SISTEM PENGURUSAN LOT TANAH</h2>
+                <small style="color:#888; font-weight:700; font-size:10px;">VERSION 5.0 SUPER FINAL (STABLE)</small>
             </div>
         </div>
-
-        <div class="user-profile">
-            <div style="width:10px; height:10px; border-radius:50%; background:var(--success);" class="pulse"></div>
-            <span id="display-user" style="font-size:13px; font-weight:800; color:var(--primary);">GUEST USER</span>
-            <button onclick="location.reload()" style="border:none; background:none; cursor:pointer; color:var(--danger); margin-left:10px;">
-                <i class="fas fa-sign-out-alt"></i>
-            </button>
+        <div style="display:flex; align-items:center; gap:20px;">
+            <div id="user-profile" style="background:#f0f2f5; padding:8px 15px; border-radius:50px; font-weight:800; font-size:11px; color:var(--puo-blue);">
+                <i class="fas fa-user-shield"></i> <span id="user_name">GUEST</span>
+            </div>
+            <button onclick="location.reload()" style="border:none; background:none; color:var(--accent-pink); cursor:pointer; font-weight:800;">KELUAR</button>
         </div>
     </header>
 
-    <div id="main-container">
-        
+    <div id="content-wrapper">
         <aside id="sidebar">
             <div class="sidebar-header">
-                <h4 style="color:var(--primary); font-weight:800;">DASHBOARD</h4>
                 <div class="stat-grid">
-                    <div class="stat-card">
-                        <span>Jumlah Lot</span>
-                        <h3 id="stat-count">0</h3>
+                    <div class="stat-item">
+                        <small>Lot Aktif</small>
+                        <h2 id="total-lots">0</h2>
                     </div>
-                    <div class="stat-card" style="background:var(--secondary);">
-                        <span>Keluasan (m²)</span>
-                        <h3 id="stat-area">0.00</h3>
+                    <div class="stat-item" style="background:var(--accent-pink);">
+                        <small>Luas Keseluruhan</small>
+                        <h2 id="total-area">0.00</h2>
                     </div>
                 </div>
+                <input type="text" id="lot-search" class="search-box" onkeyup="filterLotList()" placeholder="Cari No Lot (cth: 1234)...">
+                <select id="lot-dropdown" class="search-box" style="margin-bottom:0;" onchange="navigateToLot(this.value)">
+                    <option value="">-- SENARAI LOT DIKESAN --</option>
+                </select>
             </div>
 
-            <div class="sidebar-scroll">
-                <div class="section-title"><i class="fas fa-search"></i> CARIAN DATA</div>
-                <input type="text" id="mapSearch" onkeyup="filterList()" placeholder="Taip No Lot (Contoh: 1234)..." 
-                       style="width:100%; padding:15px; border-radius:12px; border:2px solid var(--primary); margin-bottom:10px;">
-                
-                <select id="lotDropdown" onchange="zoomToLot(this.value)" 
-                        style="width:100%; padding:12px; border-radius:10px; background:#f8f9fa; border:1px solid #ddd; cursor:pointer;">
-                    <option value="">-- SENARAI LOT AKTIF --</option>
-                </select>
-
-                <div class="section-title"><i class="fas fa-info-circle"></i> ATRIBUT GEOSPATIAL</div>
-                <div id="info-card">
-                    <div class="info-header">
-                        <span>MAKLUMAT TERPERINCI</span>
-                        <i class="fas fa-map-marker-alt"></i>
-                    </div>
-                    <table class="data-table" id="data-table">
+            <div class="sidebar-content">
+                <div id="info-card" class="info-card">
+                    <div class="info-card-header">PROFIL ATRIBUT LOT</div>
+                    <table class="data-table" id="data-display">
                         </table>
                     <div style="padding:15px; display:flex; gap:10px;">
-                        <button onclick="copyData()" style="flex:1; padding:10px; border-radius:8px; border:none; background:#eee; cursor:pointer; font-weight:600;">
-                            <i class="fas fa-copy"></i> SALIN
-                        </button>
-                        <button onclick="alert('Laporan PDF dijana...')" style="flex:1; padding:10px; border-radius:8px; border:none; background:var(--primary); color:white; cursor:pointer; font-weight:600;">
-                            <i class="fas fa-file-pdf"></i> CETAK
-                        </button>
+                        <button class="btn-action" style="background:#eee;" onclick="copyData()">SALIN</button>
+                        <button class="btn-action" style="background:var(--puo-blue); color:white;" onclick="alert('Menjana Pelan Lot...')">CETAK PELAN</button>
                     </div>
                 </div>
 
-                <div class="section-title"><i class="fas fa-layer-group"></i> TETAPAN PETA</div>
-                <div style="display:flex; gap:5px;">
-                    <button class="tool-btn" onclick="changeBasemap('sat')" title="Satelit"><i class="fas fa-globe"></i></button>
-                    <button class="tool-btn" onclick="changeBasemap('osm')" title="Street"><i class="fas fa-road"></i></button>
-                    <button class="tool-btn" onclick="changeBasemap('topo')" title="Topo"><i class="fas fa-mountain"></i></button>
+                <div style="margin-top:30px;">
+                    <h4 style="font-size:11px; font-weight:800; color:#aaa; text-transform:uppercase; margin-bottom:15px;">Arahan Sistem</h4>
+                    <p style="font-size:12px; line-height:1.6; color:#555;">
+                        <i class="fas fa-dot-circle" style="color:red;"></i> Klik pada <b>Titik Merah</b> untuk mendapatkan koordinat bucu.<br><br>
+                        <i class="fas fa-vector-square" style="color:var(--puo-blue);"></i> Klik pada <b>Poligon</b> untuk maklumat pemilik & keluasan.
+                    </p>
                 </div>
             </div>
 
-            <div id="activity-log">
-                [SYSTEM] Menunggu pengesahan pengguna...<br>
+            <div id="console">
+                [SYSTEM] Memulakan modul geospatial...
             </div>
         </aside>
 
-        <main id="map">
-            <div class="map-tools">
-                <button class="tool-btn" onclick="map.zoomIn()" title="Zoom In"><i class="fas fa-plus"></i></button>
-                <button class="tool-btn" onclick="map.zoomOut()" title="Zoom Out"><i class="fas fa-minus"></i></button>
-                <button class="tool-btn" onclick="resetMap()" title="Home View"><i class="fas fa-home"></i></button>
-                <button class="tool-btn" onclick="toggleLabels()" title="Tutup Label"><i class="fas fa-tag"></i></button>
-            </div>
-        </main>
+        <main id="map"></main>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="data/LOTFINAL_2.js"></script> <script>
-        /* --- JS STATE MANAGEMENT --- */
-        const DB_USERS = { 1: "Chan Boon Yeah", 2: "Wong Yuean Yi", 3: "Ooi Sue Ann" };
-        let appData = {
-            currentUser: null,
-            totalArea: 0,
-            lotCount: 0,
-            labelsVisible: true,
-            activeLayer: null
-        };
+    <script src="data/LOTFINAL_2.js"></script>
 
-        var map, lotLayer;
-        var basemaps = {
-            sat: L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', { maxZoom: 22 }),
-            osm: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'),
-            topo: L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png')
-        };
+    <script>
+        const AUTH_DB = { 1: "Chan Boon Yeah", 2: "Wong Yuean Yi", 3: "Ooi Sue Ann" };
+        var map, lotLayer, vertexLayer;
+        var currentSelection = null;
 
-        /* --- AUTHENTICATION --- */
-        function handleAuth() {
-            const id = document.getElementById('uid').value;
-            const ps = document.getElementById('ups').value;
-            const msg = document.getElementById('auth-msg');
+        /* AUTH LOGIC */
+        function validateAccess() {
+            const id = document.getElementById('user_id').value;
+            const key = document.getElementById('user_key').value;
+            const feedback = document.getElementById('login-feedback');
 
-            if (DB_USERS[id] && ps === "admin123") {
-                appData.currentUser = DB_USERS[id];
-                document.getElementById('login-screen').style.transform = "translateY(-100%)";
-                document.getElementById('app-header').style.display = "flex";
-                document.getElementById('main-container').style.display = "flex";
-                document.getElementById('display-user').innerText = appData.currentUser.toUpperCase();
+            if (AUTH_DB[id] && key === "admin123") {
+                document.getElementById('auth-overlay').style.transform = "translateY(-100%)";
+                document.getElementById('main-header').style.display = "flex";
+                document.getElementById('content-wrapper').style.display = "flex";
+                document.getElementById('user_name').innerText = AUTH_DB[id].toUpperCase();
                 
-                logToTerminal(`Selamat Datang, ${appData.currentUser}. Melancarkan engine...`);
-                setTimeout(initMap, 800);
+                printLog(`Akses dibenarkan: ${AUTH_DB[id]}`);
+                setTimeout(initWebGIS, 500);
             } else {
-                msg.innerText = "RALAT: Kredential tidak sah!";
+                feedback.innerText = "RALAT: ID atau Kata Laluan Salah!";
             }
         }
 
-        /* --- MAP CORE --- */
-        function initMap() {
-            map = L.map('map', {
-                zoomControl: false,
-                attributionControl: false
-            }).setView([2.1036, 102.5226], 18);
+        /* WEBGIS CORE */
+        function initWebGIS() {
+            map = L.map('map', { zoomControl: false }).setView([2.1036, 102.5226], 19);
 
-            basemaps.sat.addTo(map);
-            logToTerminal("Base layer: Google Hybrid dimuatkan.");
+            // Google Hybrid Basemap
+            L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+                maxZoom: 22,
+                attribution: 'JKA PUO | Google Maps'
+            }).addTo(map);
+
+            L.control.zoom({ position: 'topright' }).addTo(map);
             
-            loadGeoData();
+            vertexLayer = L.featureGroup().addTo(map);
+            
+            if (typeof json_LOTFINAL_2 !== 'undefined') {
+                renderGeoData(json_LOTFINAL_2);
+            } else {
+                printLog("FATAL ERROR: Fail data lot tidak ditemui!");
+            }
         }
 
-        function loadGeoData() {
-            if (typeof json_LOTFINAL_2 === 'undefined') {
-                logToTerminal("RALAT: Fail data lot tidak dijumpai!");
-                return;
-            }
+        function renderGeoData(data) {
+            let totalA = 0;
+            let count = 0;
 
-            lotLayer = L.geoJson(json_LOTFINAL_2, {
-                style: function(feature) {
-                    return {
-                        color: "#fff",
-                        weight: 2,
-                        fillColor: "#e91e63",
-                        fillOpacity: 0.2
-                    };
-                },
+            lotLayer = L.geoJson(data, {
+                style: { color: "#fff", weight: 2, fillColor: "#e91e63", fillOpacity: 0.2 },
                 onEachFeature: function(feature, layer) {
-                    const props = feature.properties;
-                    const lotNo = props['NO_LOT'] || "???";
-                    
-                    // Add Tooltip (The Label you requested)
+                    const p = feature.properties;
+                    const lotNo = p['NO_LOT'] || "TBA";
+
+                    // 1. Labeling
                     layer.bindTooltip(lotNo.toString(), {
-                        permanent: true,
-                        direction: 'center',
-                        className: 'lot-label'
+                        permanent: true, direction: 'center', className: 'lot-label'
                     });
 
-                    // Update Sidebar List
-                    const drop = document.getElementById('lotDropdown');
+                    // 2. Vertex Discovery Logic
+                    processVertices(feature, lotNo);
+
+                    // 3. UI Update
+                    const drop = document.getElementById('lot-dropdown');
                     const opt = document.createElement('option');
                     opt.value = lotNo;
                     opt.text = `LOT ${lotNo}`;
                     drop.appendChild(opt);
 
-                    // Calculations
-                    appData.lotCount++;
-                    appData.totalArea += parseFloat(props['AREA'] || 0);
+                    totalA += parseFloat(p['AREA'] || 0);
+                    count++;
 
-                    // Interaction
+                    // 4. Interaction
                     layer.on('click', function(e) {
                         highlightFeature(layer);
-                        showAttributes(props, e.latlng || layer.getBounds().getCenter());
+                        updateInfoPanel(p, e.latlng || layer.getBounds().getCenter());
                     });
                 }
             }).addTo(map);
 
-            // Update Stats
-            document.getElementById('stat-count').innerText = appData.lotCount;
-            document.getElementById('stat-area').innerText = appData.totalArea.toLocaleString(undefined, {minimumFractionDigits: 2});
+            document.getElementById('total-lots').innerText = count;
+            document.getElementById('total-area').innerText = totalA.toLocaleString(undefined, {minimumFractionDigits: 2});
             
             map.fitBounds(lotLayer.getBounds());
-            logToTerminal(`Sistem sedia. ${appData.lotCount} lot diproses.`);
+            printLog(`Engine sedia. ${count} lot dan semua bucu berjaya dimuatkan.`);
         }
 
-        /* --- FEATURES --- */
-        function showAttributes(p, ll) {
+        /* VERTEX PROCESSING UNIT */
+        function processVertices(feature, lotNo) {
+            if (!feature.geometry) return;
+
+            const coords = feature.geometry.type === "Polygon" ? 
+                           feature.geometry.coordinates[0] : 
+                           feature.geometry.coordinates[0][0];
+
+            coords.forEach((coord, index) => {
+                // Jangan tanda titik akhir jika sama dengan titik mula (poligon tutup)
+                if (index === coords.length - 1 && index > 0) return;
+
+                L.circleMarker([coord[1], coord[0]], {
+                    radius: 5,
+                    color: "white",
+                    fillColor: "red",
+                    weight: 2,
+                    fillOpacity: 1,
+                    className: 'vertex-marker'
+                }).addTo(vertexLayer)
+                .bindPopup(`
+                    <div style="font-family:'JetBrains Mono'; font-size:11px;">
+                        <b style="color:red">BUCU (VERTEX) #${index + 1}</b><br>
+                        Lot Asal: ${lotNo}<br><hr>
+                        Lat: ${coord[1].toFixed(8)}<br>
+                        Lng: ${coord[0].toFixed(8)}
+                    </div>
+                `);
+            });
+        }
+
+        /* UI LOGIC */
+        function updateInfoPanel(p, ll) {
             const card = document.getElementById('info-card');
-            const table = document.getElementById('data-table');
+            const display = document.getElementById('data-display');
             card.style.display = "block";
 
-            table.innerHTML = `
-                <tr><td class="label-cell">Nombor Lot</td><td class="value-cell">${p['NO_LOT']}</td></tr>
-                <tr><td class="label-cell">Keluasan</td><td class="value-cell">${p['AREA'] || '0.0'} m²</td></tr>
-                <tr><td class="label-cell">Pemilik</td><td class="value-cell">${p['TSP-PEMILIK'] || p['tsp — pe'] || 'TIADA DATA'}</td></tr>
-                <tr><td class="label-cell">Koordinat Y (Lat)</td><td class="value-cell" style="color:red">${ll.lat.toFixed(7)}</td></tr>
-                <tr><td class="label-cell">Koordinat X (Lng)</td><td class="value-cell" style="color:red">${ll.lng.toFixed(7)}</td></tr>
-                <tr><td class="label-cell">Kegunaan Tanah</td><td class="value-cell">BANGUNAN</td></tr>
+            display.innerHTML = `
+                <tr><td>NOMBOR LOT</td><td>${p['NO_LOT']}</td></tr>
+                <tr><td>KELUASAN</td><td>${p['AREA'] || '0.00'} m²</td></tr>
+                <tr><td>PEMILIK</td><td>${p['TSP-PEMILIK'] || p['tsp — pe'] || 'TIADA MAKLUMAT'}</td></tr>
+                <tr><td>KOORDINAT LAT</td><td style="color:red">${ll.lat.toFixed(7)}</td></tr>
+                <tr><td>KOORDINAT LNG</td><td style="color:red">${ll.lng.toFixed(7)}</td></tr>
+                <tr><td>STATUS UKUR</td><td>TELAH DISAHKAN</td></tr>
             `;
-            logToTerminal(`Melihat data Lot: ${p['NO_LOT']}`);
+            
+            currentSelection = `LOT: ${p['NO_LOT']} | COORDS: ${ll.lat}, ${ll.lng}`;
+            printLog(`Menganalisis Lot ${p['NO_LOT']}...`);
         }
 
         function highlightFeature(layer) {
-            if (appData.activeLayer) {
-                lotLayer.resetStyle(appData.activeLayer);
-            }
-            appData.activeLayer = layer;
-            layer.setStyle({
-                fillColor: '#00e5ff',
-                fillOpacity: 0.6,
-                weight: 4,
-                color: '#fff'
-            });
+            lotLayer.setStyle({ fillOpacity: 0.2, weight: 2, color: "#fff" });
+            layer.setStyle({ fillOpacity: 0.5, weight: 4, fillColor: "#00e5ff" });
             map.fitBounds(layer.getBounds(), { padding: [50, 50] });
         }
 
-        function zoomToLot(val) {
+        function navigateToLot(val) {
             if (!val) return;
             lotLayer.eachLayer(l => {
-                if (l.feature.properties['NO_LOT'] == val) {
-                    l.fire('click');
-                }
+                if (l.feature.properties['NO_LOT'] == val) l.fire('click');
             });
         }
 
-        function filterList() {
-            const v = document.getElementById('mapSearch').value.toUpperCase();
-            const opts = document.getElementById('lotDropdown').options;
+        function filterLotList() {
+            const s = document.getElementById('lot-search').value.toUpperCase();
+            const opts = document.getElementById('lot-dropdown').options;
             for (let i = 1; i < opts.length; i++) {
-                opts[i].style.display = opts[i].text.includes(v) ? "" : "none";
+                opts[i].style.display = opts[i].text.includes(s) ? "" : "none";
             }
         }
 
-        function changeBasemap(type) {
-            Object.values(basemaps).forEach(layer => map.removeLayer(layer));
-            basemaps[type].addTo(map);
-            logToTerminal(`Tukar peta kepada mod: ${type.toUpperCase()}`);
-        }
-
-        function toggleLabels() {
-            appData.labelsVisible = !appData.labelsVisible;
-            lotLayer.eachLayer(l => {
-                if (appData.labelsVisible) l.openTooltip();
-                else l.closeTooltip();
-            });
-            logToTerminal(`Label lot: ${appData.labelsVisible ? 'DIBUKA' : 'DITUTUP'}`);
-        }
-
-        function resetMap() {
-            map.fitBounds(lotLayer.getBounds());
-            document.getElementById('info-card').style.display = "none";
-            if (appData.activeLayer) lotLayer.resetStyle(appData.activeLayer);
-            logToTerminal("Pandangan peta ditetapkan semula.");
+        function printLog(msg) {
+            const con = document.getElementById('console');
+            const now = new Date().toLocaleTimeString();
+            con.innerHTML += `> [${now}] ${msg}<br>`;
+            con.scrollTop = con.scrollHeight;
         }
 
         function copyData() {
-            const rows = document.querySelectorAll('#data-table tr');
-            let txt = "--- DATA LOT JKA PUO ---\n";
-            rows.forEach(r => txt += `${r.cells[0].innerText}: ${r.cells[1].innerText}\n`);
-            navigator.clipboard.writeText(txt);
-            alert("Data disalin ke clipboard!");
+            if (!currentSelection) return;
+            navigator.clipboard.writeText(currentSelection);
+            alert("Data koordinat berjaya disalin!");
         }
 
-        function logToTerminal(msg) {
-            const log = document.getElementById('activity-log');
-            const time = new Date().toLocaleTimeString();
-            log.innerHTML += `[${time}] ${msg}<br>`;
-            log.scrollTop = log.scrollHeight;
-        }
-
-        // Handle enter key for login
+        // Support Enter Key
         document.addEventListener('keypress', (e) => {
-            if(e.key === 'Enter' && document.getElementById('login-screen').style.transform !== "translateY(-100%)") {
-                handleAuth();
-            }
+            if(e.key === 'Enter') validateAccess();
         });
 
     </script>
